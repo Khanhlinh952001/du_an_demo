@@ -9,10 +9,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
-    },
+        primary: {
+          DEFAULT: '#1D3A5F',  // Xanh đậm (Sidebar, Header)
+          dark: '#1E3A8A',     // Xanh đậm (Bảng tiêu đề)
+        },
+        background: '#F9FAFB',  // Xám nhạt (Nền chính)
+        text: {
+          primary: '#1F2937',   // Xám đậm (Tiêu đề chính)
+          body: '#000000',      // Đen (Văn bản chính)
+          footer: '#6B7280',    // Xám nhạt (Chân trang)
+        },
+        button: {
+          primary: '#3490DC',   // Xanh dương (Nút chính)
+          secondary: '#F59E0B', // Cam sáng (Nút phụ)
+        },
+        link: '#10B981',        // Xanh lá cây (Các liên kết)
+        table: '#E5E7EB',       // Xám sáng (Các bảng dữ liệu)
+        alert: {
+          warning: '#F97316',   // Cam (Dữ liệu quan trọng)
+          error: '#F43F5E',     // Đỏ (Thông báo hoặc cảnh báo)
+        }
+      }
+    }
   },
   plugins: [],
 };
