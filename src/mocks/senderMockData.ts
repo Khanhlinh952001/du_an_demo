@@ -1,9 +1,9 @@
 import { Sender } from "@/types/Sender";
 
-export const senderMockData : Sender[] = [
+export const senderMockData: Sender[] = [
   {
     manageId: "ADMIN001",
-    handlerId: "HANDLER001",
+    handlerId: "HDL001",
     joinDate: "2024-03-15",
     senderId: "KH001",
     name: "Nguyễn Văn A",
@@ -14,12 +14,12 @@ export const senderMockData : Sender[] = [
     address: "123 Nguyễn Huệ, Q1, TP.HCM",
     contactChannel: "Facebook",
     orderCount: 15,
-    unitPrice: 8000,
+    
     registerDate: "2024-01-01"
   },
   {
     manageId: "ADMIN002",
-    handlerId: "HANDLER002",
+    handlerId: "QL002",
     joinDate: "2024-03-10",
     senderId: "KH002",
     name: "Trần Thị B",
@@ -30,12 +30,12 @@ export const senderMockData : Sender[] = [
     address: "456 Lê Lợi, Q5, TP.HCM",
     contactChannel: "Zalo",
     orderCount: 8,
-    unitPrice: 8000,
+    unitPrice: 2000000,
     registerDate: "2024-02-15"
   },
   {
     manageId: "ADMIN001",
-    handlerId: "HANDLER003",
+    handlerId: "QL003",
     joinDate: "2024-02-20",
     senderId: "KH003",
     name: "Park Min Young",
@@ -46,7 +46,7 @@ export const senderMockData : Sender[] = [
     address: "789 Hai Bà Trưng, Q3, TP.HCM",
     contactChannel: "KakaoTalk",
     orderCount: 25,
-    unitPrice: 8000,
+    unitPrice: 1800000,
     registerDate: "2024-01-20"
   }
 ]; 

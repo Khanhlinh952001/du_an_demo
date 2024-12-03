@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Modal, Form, Input, DatePicker, Select } from 'antd';
 import type { Sender } from '@/types/Sender';
 import dayjs from 'dayjs';
-import { FacebookFilled, MessageFilled } from '@ant-design/icons';
+import { FacebookFilled, MessageFilled, UserOutlined, PhoneOutlined, EnvironmentOutlined, CalendarOutlined } from '@ant-design/icons';
 
 interface AddSenderModalProps {
   open: boolean;
@@ -64,7 +64,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
         style={{ padding: '20px' }}
       >
         <div style={{ marginBottom: '24px' }}>
-          <h3>Thông tin cơ bản</h3>
+          <h3><UserOutlined style={{ color: '#1890ff', marginRight: '8px' }} />Thông tin cơ bản</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <Form.Item
               name="senderId"
@@ -93,16 +93,10 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                 { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' }
               ]}
             >
-              <Input placeholder="Nhập số điện thoại" />
+              <Input prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} placeholder="Nhập số điện thoại" />
             </Form.Item>
 
-            <Form.Item
-              name="joinDate"
-              label="Ngày tham gia"
-              rules={[{ required: true, message: 'Vui lòng chọn ngày tham gia' }]}
-            >
-              <DatePicker style={{ width: '100%' }} />
-            </Form.Item>
+           
           </div>
 
           <Form.Item

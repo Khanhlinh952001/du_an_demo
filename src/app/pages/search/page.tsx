@@ -13,6 +13,16 @@ import { columns } from './columns';
 import { OrderMockData } from '@/mocks/OrderMock';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
+import {
+  filterByDateRange,
+  filterBySender,
+  filterByReceiver,
+  filterByPaymentStatus,
+  filterByRegion,
+  filterByServiceType,
+  filterByShippingType,
+  filterByPhone
+} from '@/utils/orderFilters';
 
 // Cấu hình các cột có thể ẩn/hiện
 const columnConfigs = [
@@ -66,94 +76,44 @@ const SearchPage: React.FC = () => {
   } = useColumnVisibility(columns, defaultVisibleColumns);
 
   const onFinish = (values: any) => {
-    console.log('Form values:', values); // Debug form values
     let filtered = [...OrderMockData];
-    console.log('Initial data:', filtered); // Debug initial data
 
-    // Filter based on date range
+    // Kiểm tra các điều kiện đơn giản trước
+    if (values.phone) {
+      filtered = filterByPhone(filtered, values.phone);
+    }
+
+    if (values.sender) {
+      filtered = filterBySender(filtered, values.sender);
+    }
+
+    if (values.receiver) {
+      filtered = filterByReceiver(filtered, values.receiver);
+    }
+
+    if (values.paymentStatus) {
+      filtered = filterByPaymentStatus(filtered, values.paymentStatus);
+    }
+
+    if (values.region) {
+      filtered = filterByRegion(filtered, values.region);
+    }
+
+    if (values.serviceType) {
+      filtered = filterByServiceType(filtered, values.serviceType);
+    }
+
+    if (values.shippingType) {
+      filtered = filterByShippingType(filtered, values.shippingType);
+    }
+
+    // Để điều kiện phức tạp hơn xuống cuối
     if (values.shipmentDate?.length === 2) {
       const [startDate, endDate] = values.shipmentDate;
-      filtered = filtered.filter(order => {
-        const orderDate = new Date(order.createdAt);
-        return orderDate.getTime() >= startDate.valueOf() 
-          && orderDate.getTime() <= endDate.valueOf();
-      });
-      console.log('After date filter:', filtered); // Debug after date filter
-    }
-
-    // Filter by sender name
-    if (values.sender) {
-      filtered = filtered.filter(order => 
-        order.senderName.toLowerCase().includes(values.sender.toLowerCase())
-      );
-      console.log('After sender filter:', filtered); // Debug after sender filter
-    }
-
-    // Filter by receiver name
-    if (values.receiver) {
-      filtered = filtered.filter(order => 
-        order.receiverName.toLowerCase().includes(values.receiver.toLowerCase())
-      );
-      console.log('After receiver filter:', filtered); // Debug after receiver filter
-    }
-
-    // Filter by payment status
-    if (values.paymentStatus && values.paymentStatus !== 'all') {
-      filtered = filtered.filter(order => 
-        order.paymentStatus === values.paymentStatus
-      );
-      console.log('After payment filter:', filtered); // Debug after payment filter
-    }
-
-    // Filter by region
-    if (values.region) {
-      filtered = filtered.filter(order => 
-        order.origin === values.region || order.destination === values.region
-      );
-      console.log('After region filter:', filtered); // Debug after region filter
-    }
-
-    // Filter by service type
-    if (values.serviceType) {
-      filtered = filtered.filter(order => order.serviceType === values.serviceType);
-      console.log('After service type filter:', filtered);
-    }
-
-    // Filter by shipping type
-    if (values.shippingType) {
-      filtered = filtered.filter(order => order.shippingType === values.shippingType);
-      console.log('After shipping type filter:', filtered);
-    }
-
-    // Filter by phone
-    if (values.phone) {
-      filtered = filtered.filter(order => 
-        order.senderPhone.includes(values.phone) || 
-        order.receiverPhone.includes(values.phone)
-      );
-      console.log('After phone filter:', filtered);
+      filtered = filterByDateRange(filtered, startDate, endDate);
     }
 
     setFilteredData(filtered);
-    console.log('Final filtered data:', filtered); // Debug final results
-  };
-
-  const handleScroll = (direction: 'left' | 'right') => {
-    const tableContainer = document.querySelector('.ant-table-content');
-    if (tableContainer) {
-      const scrollAmount = 300;
-      if (direction === 'left') {
-        tableContainer.scrollBy({
-          left: -scrollAmount,
-          behavior: 'smooth'
-        });
-      } else {
-        tableContainer.scrollBy({
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
-      }
-    }
   };
 
   return (

@@ -8,8 +8,12 @@ import { senderMockData } from '@/mocks/senderMockData';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 import { columns } from './columns';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UsergroupAddOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import RecipientPage from "../recipients/page";
+import * as XLSX from 'xlsx';
+import { senderExportConfig, createExportData } from '@/configs/exportConfig';
+import ExportModal from '@/components/common/ExportModal';
+
 export default function SenderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSender, setEditingSender] = useState<Sender | undefined>();
@@ -17,6 +21,11 @@ export default function SenderPage() {
   const [senders, setSenders] = useState<Sender[]>([]);
   const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
   const [selectedSenderId, setSelectedSenderId] = useState<string | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  
+const rowClassName = (record: any, index: number) => {
+  return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+};
 
   const columnConfigs = [
     { key: 'senderId', label: 'Mã KH' },
@@ -102,13 +111,14 @@ export default function SenderPage() {
             style={{ marginRight: 8 }}
           />
           <Button
+          icon={<UsergroupAddOutlined />}
             onClick={() => {
               setSelectedSenderId(record.senderId);
               setIsRecipientModalOpen(true);
             }}
-          >
-            Xem người nhận
-          </Button>
+          />
+           
+          
         </div>
       ),
     },
@@ -119,13 +129,67 @@ export default function SenderPage() {
     console.log('Delete:', record);
   };
 
+  const handleExport = (selectedFields: string[]) => {
+    const exportData = createExportData(senders, selectedFields, senderExportConfig);
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Danh sách người gửi");
+    XLSX.writeFile(wb, "danh-sach-nguoi-gui.xlsx");
+    setIsExportModalOpen(false);
+  };
+
+  const handleUpdateFromExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json<Sender>(worksheet);
+
+      // Cập nhật state với dữ liệu mới
+      setSenders(jsonData);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
   return <MainLayout>
     <div className="p-4">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-800">Danh sách người gửi</h1>
-        <Button type="primary" onClick={() => setIsModalOpen(true)}>
-          Thêm người gửi
-        </Button>
+        <h1 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+          Danh sách người gửi
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={() => setIsExportModalOpen(true)}
+            className="bg-green-500 hover:bg-green-600 text-white"
+          >
+            Xuất Excel
+          </Button>
+          <label htmlFor="upload-excel" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded cursor-pointer flex items-center gap-2">
+            <UploadOutlined />
+            Cập nhật từ Excel
+            <input
+              id="upload-excel"
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={handleUpdateFromExcel}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <Button 
+            type="primary" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            Thêm người gửi
+          </Button>
+          
+        </div>
       </div>
 
       <ColumnVisibilityControl
@@ -139,6 +203,7 @@ export default function SenderPage() {
         columns={columnsWithActions}
         dataSource={senders}
         rowKey="id"
+        rowClassName={rowClassName}
         className="bg-white rounded-lg shadow-sm"
         pagination={{
           pageSize: 10,
@@ -167,5 +232,12 @@ export default function SenderPage() {
     >
       <RecipientPage senderId={selectedSenderId} />
     </Modal>
+
+    <ExportModal
+      open={isExportModalOpen}
+      onCancel={() => setIsExportModalOpen(false)}
+      onExport={handleExport}
+      fields={senderExportConfig}
+    />
   </MainLayout>;
 }

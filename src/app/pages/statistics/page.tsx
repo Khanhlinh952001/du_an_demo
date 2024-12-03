@@ -123,13 +123,7 @@ const StatisticsPage = () => {
     }
   }, [startDate, endDate, selectedRegion, serviceType]);
 
-  // Data mẫu cho biểu đồ doanh số theo phương thức vận chuyển
-  const shippingData = [
-    { type: 'Đường bay', value: 350000000, region: 'HN' },
-    { type: 'Đường bay', value: 420000000, region: 'SGN' },
-    { type: 'Đường biển', value: 280000000, region: 'HN' },
-    { type: 'Đường biển', value: 310000000, region: 'SGN' },
-  ];
+ 
 
   // Thay thế cấu hình biểu đồ cột
   const shippingChartData = {
@@ -179,14 +173,6 @@ const StatisticsPage = () => {
     ],
   };
 
-  const paymentChartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-    },
-  };
 
   // Data top khách hàng
   const topCustomersData = [
@@ -205,11 +191,7 @@ const StatisticsPage = () => {
     },
   ];
 
-  // Thêm phân tích theo khu vực
-  const regionAnalysis = [
-    { region: 'Miền Bắc', orders: 450, revenue: 850000000 },
-    { region: 'Miền Nam', orders: 520, revenue: 980000000 },
-  ];
+
 
   // Phân tích theo trạng thái đơn hàng
   const orderStatusData = [
@@ -220,14 +202,7 @@ const StatisticsPage = () => {
   ];
 
   // Thêm Card cho phân tích xu hướng
-  const orderTrends = [
-    { date: '2023-01-01', value: 100, type: 'Đường bay' },
-    { date: '2023-01-02', value: 120, type: 'Đường bay' },
-    { date: '2023-01-03', value: 150, type: 'Đường bay' },
-    { date: '2023-01-04', value: 180, type: 'Đường bay' },
-    { date: '2023-01-05', value: 200, type: 'Đường bay' },
-  ];
-
+ 
   // Thêm Card cho phân tích hiệu suất nhân viên
   const employeePerformanceData = [
     { name: 'Nhân viên A', value: 80 },
