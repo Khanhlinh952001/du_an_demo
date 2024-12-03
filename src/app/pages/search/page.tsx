@@ -10,50 +10,64 @@ import { Typography } from 'antd';
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 import { columns } from './columns';
+import { OrderMockData } from '@/mocks/OrderMock';
+import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
+import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 
-
-const mockData: Order[] = [
-  {
-    orderId: 'ORD001',
-    manageId: 'MNG001',
-    handlerId: 'HDL001',
-    senderId: 'SND001',
-    senderName: 'Nguyen Van A',
-    senderPhone: '0123456789',
-    senderAddress: '123 Đường ABC, Quận 1, TP. Hồ Chí Minh',
-    receiverId: 'RCV001',
-    receiverName: 'Tran Thi B',
-    receiverPhone: '0987654321',
-    receiverAddress: '456 Đường XYZ, Quận 2, TP. Hà Nội',
-    origin: 'Hàn Quốc',
-    destination: 'Việt Nam',
-    serviceType: 'air',
-    shippingType: 'export',
-    itemType: 'Food',
-    weight: 12,
-    totalPackages: 2,
-    trackingNumber: 'TRK001',
-    shipmentDate: new Date('2024-01-01'),
-    deliveryDate: new Date('2024-01-05'),
-    createdAt: '2024-12-12',
-    updatedAt: new Date(),
-    status: 'Pending',
-    paymentStatus: true,
-    totalAmount: 1500000,
-    note: 'Ghi chú mẫu',
-    receiverRegion: 'SGN' ,
-    price:8000   // SĐT người nhận
-  },
-  // Add more mock data if needed
+// Cấu hình các cột có thể ẩn/hiện
+const columnConfigs = [
+  { key: 'createdAt', label: 'Ngày Xuất' },
+  { key: 'orderId', label: 'Mã Đơn Hàng' },
+  { key: 'senderName', label: 'Người Gửi' },
+  { key: 'senderPhone', label: 'SĐT Người Gửi' },
+  { key: 'senderAddress', label: 'Địa Chỉ Người Gửi' },
+  { key: 'receiverName', label: 'Người Nhận' },
+  { key: 'receiverPhone', label: 'SĐT Người Nhận' },
+  { key: 'receiverRegion', label: 'Khu Vực' },
+  { key: 'receiverAddress', label: 'Địa Chỉ Người Nhận' },
+  { key: 'totalPackages', label: 'Số Kiện' },
+  { key: 'weight', label: 'Trọng Lượng' },
+  { key: 'price', label: 'Giá' },
+  { key: 'totalAmount', label: 'Thành Tiền' },
+  { key: 'paymentStatus', label: 'Trạng Thái Thanh Toán' },
+  { key: 'note', label: 'Ghi Chú' },
 ];
+
+// Định nghĩa các cột mặc định hiển thị
+const defaultVisibleColumns = {
+  createdAt: true,    // Ngày xuất
+  orderId: true,      // Mã đơn hàng
+  senderName: true,   // Người gửi
+  receiverName: true, // Người nhận
+  receiverRegion: true, // Khu vực
+  totalPackages: true,  // Số kiện
+  totalAmount: true,    // Thành tiền
+  paymentStatus: true,  // Trạng thái thanh toán
+  // Các cột còn lại mặc định ẩn
+  senderPhone: false,
+  senderAddress: false,
+  receiverPhone: false,
+  receiverAddress: false,
+  weight: false,
+  price: false,
+  note: false,
+};
+
 
 const SearchPage: React.FC = () => {
   const [form] = Form.useForm();
-  const [filteredData, setFilteredData] = useState<Order[]>(mockData);
+  const [filteredData, setFilteredData] = useState<Order[]>(OrderMockData);
+
+  // Sử dụng hook useColumnVisibility để quản lý việc ẩn/hiện cột
+  const {
+    visibleColumns,
+    handleColumnVisibilityChange,
+    filteredColumns
+  } = useColumnVisibility(columns, defaultVisibleColumns);
 
   const onFinish = (values: any) => {
     console.log('Form values:', values); // Debug form values
-    let filtered = [...mockData];
+    let filtered = [...OrderMockData];
     console.log('Initial data:', filtered); // Debug initial data
 
     // Filter based on date range
@@ -239,8 +253,17 @@ const SearchPage: React.FC = () => {
           </Form>
         </Card>
 
+        <Card title="Tùy chỉnh hiển thị" className="mb-4">
+          <ColumnVisibilityControl
+            columns={columnConfigs}
+            visibleColumns={visibleColumns}
+            onChange={handleColumnVisibilityChange}
+            title="Chọn các cột muốn hiển thị:"
+          />
+        </Card>
+
         <Table
-          columns={columns}
+          columns={filteredColumns}
           dataSource={filteredData}
           scroll={{ x: 1800 }}
           style={{ 

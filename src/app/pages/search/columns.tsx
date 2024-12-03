@@ -1,8 +1,8 @@
 import { ColumnsType } from "antd/es/table";
 import { Order } from "@/types/Order";
 import { Tag } from "antd";
-
-export const columns: ColumnsType<Order> = [
+import type { ExtendedColumnType } from "../sender/columns";
+export const columns: ExtendedColumnType<Order>[] = [
   {
     title: 'Ngày Xuất',
     dataIndex: 'createdAt',

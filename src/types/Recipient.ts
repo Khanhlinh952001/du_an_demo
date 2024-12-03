@@ -9,7 +9,6 @@ export interface Recipient {
   shipper: string;         // Đơn vị vận chuyển (ví dụ: VNPost, DHL, FedEx, v.v.)
   note?: string;           // Ghi chú (optional)
   senderId: string;      // Mã khách hàng liên quan tới người nhận này
-  email?: string;          // (Optional) Email của người nhận, nếu cần
   isConfirmed?: boolean;   // (Optional) Trạng thái xác nhận của người nhận
   createdAt: Date;         // Ngày tạo thông tin người nhận
   updatedAt: Date;         // Ngày cập nhật thông tin người nhận
