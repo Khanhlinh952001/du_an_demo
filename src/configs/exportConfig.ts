@@ -43,20 +43,49 @@ export const recipientExportConfig: ExportFieldConfig[] = [
   { key: 'status', label: 'Trạng thái' }
 ];
 
+// Thêm cấu hình cho đơn hàng
+export const orderExportConfig = [
+  { key: 'createdAt', label: 'Ngày Xuất' },
+  { key: 'orderId', label: 'Mã Đơn Hàng' },
+  { key: 'senderName', label: 'Người Gửi' },
+  { key: 'senderPhone', label: 'SĐT Người Gửi' },
+  { key: 'senderAddress', label: 'Địa Chỉ Người Gửi' },
+  { key: 'receiverName', label: 'Người Nhận' },
+  { key: 'receiverPhone', label: 'SĐT Người Nhận' },
+  { key: 'receiverRegion', label: 'Khu Vực' },
+  { key: 'receiverAddress', label: 'Địa Chỉ Người Nhận' },
+  { key: 'totalPackages', label: 'Số Kiện' },
+  { key: 'weight', label: 'Trọng Lượng' },
+  { key: 'price', label: 'Giá' },
+  { key: 'totalAmount', label: 'Thành Tiền' },
+  { key: 'paymentStatus', label: 'Trạng Thái Thanh Toán' },
+  { key: 'note', label: 'Ghi Chú' },
+];
+
 // Hàm helper để tạo dữ liệu xuất
-export const createExportData = (records: any[], selectedFields: string[], config: ExportFieldConfig[]) => {
-  return records.map(record => {
-    const data: any = {};
-    selectedFields.forEach(fieldKey => {
-      const fieldConfig = config.find(c => c.key === fieldKey);
+export const createExportData = (data: any[], selectedFields: string[], config: any[]) => {
+  return data.map(item => {
+    const exportItem: any = {};
+    selectedFields.forEach(field => {
+      const fieldConfig = config.find(c => c.key === field);
       if (fieldConfig) {
-        const value = fieldConfig.getValue 
-          ? fieldConfig.getValue(record)
-          : record[fieldKey];
-        data[fieldConfig.label] = value;
+        let value = item[field];
+        
+        // Xử lý các trường đặc biệt
+        if (field === 'createdAt') {
+          value = new Date(value).toLocaleDateString('vi-VN');
+        } else if (field === 'price' || field === 'totalAmount') {
+          value = value.toLocaleString('vi-VN');
+        } else if (field === 'weight') {
+          value = `${value} kg`;
+        } else if (field === 'paymentStatus') {
+          value = value ? 'Đã thanh toán' : 'Chưa thanh toán';
+        }
+        
+        exportItem[fieldConfig.label] = value;
       }
     });
-    return data;
-  }); 
-}
+    return exportItem;
+  });
+};
 

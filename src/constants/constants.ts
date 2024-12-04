@@ -4,7 +4,8 @@
 export const ROLES = {
     ADMIN: "Admin",      // Quản trị viên hệ thống, có quyền tối cao
     MANAGER: "Manager",  // Người quản lý, có quyền quản lý đơn hàng và nhân viên
-    CHECKER: "Checker",  // Nhân viên kiểm tra, chỉ có quyền kiểm tra và cập nhật trạng thái đơn hàng
+    WAREHOUSE_VN: "WarehouseVN",  // Nhân viên kho Việt Nam
+    WAREHOUSE_KR: "WarehouseKR",  // Nhân viên kho Hàn Quốc
     ACCOUNTANT: "Accountant", // Nhân viên kế toán, không có quyền quản lý đơn hàng nhưng có thể xem báo cáo
 } as const;
 
@@ -38,6 +39,7 @@ export const ROLE_PERMISSIONS = {
 export const ORDER_STATUS = {
     PENDING: "Pending",      // Đơn hàng đang chờ xử lý
     IN_PROGRESS: "InProgress", // Đơn hàng đang được xử lý
+    DELIVERY:'Delivered',
     COMPLETED: "Completed",    // Đơn hàng đã hoàn thành
     CANCELLED: "Cancelled",    // Đơn hàng bị hủy
 } as const;

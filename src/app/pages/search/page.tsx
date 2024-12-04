@@ -1,13 +1,12 @@
 "use client"
 import { Order } from '@/types/Order';
 import React, { useState } from 'react';
-import { Card, Form, Input, DatePicker, Select, Button, Table, Space } from 'antd';
+import { Card, Form, Input, DatePicker, Select, Button, Table, Space, Typography } from 'antd';
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import MainLayout from '@/layout/MainLayout';
 import { REGION } from '@/constants/constants';
-import { Typography } from 'antd';
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 import { columns } from './columns';
 import { OrderMockData } from '@/mocks/OrderMock';
@@ -23,6 +22,9 @@ import {
   filterByShippingType,
   filterByPhone
 } from '@/utils/orderFilters';
+import * as XLSX from 'xlsx';
+import { orderExportConfig, createExportData } from '@/configs/exportConfig';
+import ExportModal from '@/components/common/ExportModal';
 
 // Cấu hình các cột có thể ẩn/hiện
 const columnConfigs = [
@@ -66,7 +68,9 @@ const defaultVisibleColumns = {
 
 const SearchPage: React.FC = () => {
   const [form] = Form.useForm();
-  const [filteredData, setFilteredData] = useState<Order[]>(OrderMockData);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [searchResults, setSearchResults] = useState<Order[]>([]);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   // Sử dụng hook useColumnVisibility để quản lý việc ẩn/hiện cột
   const {
@@ -113,7 +117,28 @@ const SearchPage: React.FC = () => {
       filtered = filterByDateRange(filtered, startDate, endDate);
     }
 
-    setFilteredData(filtered);
+    setSearchResults(filtered);
+    setHasSearched(true);
+  };
+
+  const onReset = () => {
+    form.resetFields();
+    setSearchResults([]);
+    setHasSearched(false);
+  };
+
+  const handleExport = (selectedFields: string[]) => {
+    const exportData = createExportData(searchResults, selectedFields, orderExportConfig);
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Danh sách đơn hàng");
+    
+    // Tạo tên file với timestamp
+    const fileName = `don_hang_${new Date().toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    setIsExportModalOpen(false);
   };
 
   return (
@@ -123,19 +148,8 @@ const SearchPage: React.FC = () => {
           Quản lý đơn hàng
         </Title>
         
-        <Card 
-          title={<span style={{ fontSize: '18px', fontWeight: 500 }}>Tham số tra cứu</span>}
-          style={{ 
-            marginBottom: '24px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-            borderRadius: '8px'
-          }}
-        >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-          >
+        <Card title="Tham số tra cứu">
+          <Form form={form} layout="vertical" onFinish={onFinish}>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
@@ -191,6 +205,12 @@ const SearchPage: React.FC = () => {
             <Form.Item style={{ marginTop: '24px', textAlign: 'right' }}>
               <Space size="middle">
                 <Button 
+                  onClick={onReset}
+                  size="large"
+                >
+                  Làm mới
+                </Button>
+                <Button 
                   type="primary" 
                   htmlType="submit" 
                   icon={<SearchOutlined />}
@@ -198,46 +218,73 @@ const SearchPage: React.FC = () => {
                 >
                   Tìm kiếm
                 </Button>
-                <Button 
-                  icon={<DownloadOutlined />}
-                  size="large"
-                  style={{ 
-                    backgroundColor: '#52c41a',
-                    color: 'white'
-                  }}
-                >
-                  Xuất Excel
-                </Button>
+                {hasSearched && searchResults.length > 0 && (
+                  <Button 
+                    icon={<DownloadOutlined />}
+                    size="large"
+                    onClick={() => setIsExportModalOpen(true)}
+                    style={{ 
+                      backgroundColor: '#52c41a',
+                      color: 'white'
+                    }}
+                  >
+                    Xuất Excel
+                  </Button>
+                )}
               </Space>
             </Form.Item>
           </Form>
         </Card>
 
-        <Card title="Tùy chỉnh hiển thị" className="mb-4">
-          <ColumnVisibilityControl
-            columns={columnConfigs}
-            visibleColumns={visibleColumns}
-            onChange={handleColumnVisibilityChange}
-            title="Chọn các cột muốn hiển thị:"
-          />
-        </Card>
+        {hasSearched && (
+          <>
+            <Card title="Tùy chỉnh hiển thị" className="mb-4">
+              <ColumnVisibilityControl
+                columns={columnConfigs}
+                visibleColumns={visibleColumns}
+                onChange={handleColumnVisibilityChange}
+                title="Chọn các cột muốn hiển thị:"
+              />
+            </Card>
 
-        <Table
-          columns={filteredColumns}
-          dataSource={filteredData}
-          scroll={{ x: 1800 }}
-          style={{ 
-            marginTop: '24px',
-            overflowX: 'auto',
-            width: '100%',
-          }}
-          bordered
-          size="middle"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-          }}
+            {searchResults.length > 0 ? (
+              <Table
+                columns={filteredColumns}
+                dataSource={searchResults}
+                scroll={{ x: 1800 }}
+                style={{ 
+                  marginTop: '24px',
+                  overflowX: 'auto',
+                  width: '100%',
+                }}
+                bordered
+                size="middle"
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total) => `Tổng số ${total} đơn hàng`,
+                }}
+              />
+            ) : (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '40px', 
+                background: '#fafafa',
+                borderRadius: '8px',
+                marginTop: '24px'
+              }}>
+                <Text type="secondary">Không tìm thấy đơn hàng nào phù hợp</Text>
+              </div>
+            )}
+          </>
+        )}
+
+        <ExportModal
+          open={isExportModalOpen}
+          onCancel={() => setIsExportModalOpen(false)}
+          onExport={handleExport}
+          fields={orderExportConfig}
         />
       </div>
     </MainLayout>

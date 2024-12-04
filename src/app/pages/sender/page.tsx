@@ -31,15 +31,11 @@ const rowClassName = (record: any, index: number) => {
     { key: 'senderId', label: 'Mã KH' },
     { key: 'name', label: 'Tên KH' },
     { key: 'contact', label: 'Thông tin liên hệ' },
-    { key: 'social', label: 'Kênh liên hệ' },
+    { key: 'social', label: 'Mạng xã hội' },
+    { key: 'contactChannel', label: 'Kênh liên hệ' },
     { key: 'orderInfo', label: 'Thông tin đơn hàng' },
     { key: 'dates', label: 'Thời gian' },
     { key: 'phone', label: 'SĐT' },
-    {key :'zalo', label: 'Zalo'},
-    {key :'kakaoTalk', label: 'KakaoTalk'},
-    {key :'facebook', label: 'Facebook'},
-    
-
     { key: 'management', label: 'Quản lý' },
   ];
 
@@ -48,13 +44,11 @@ const rowClassName = (record: any, index: number) => {
     name: true,
     contact: true,
     social: true,
+    contactChannel: true,
     orderInfo: true,
     dates: true,
     phone: true,
-    zalo: true,
-    kakaoTalk: true,
-    facebook: true,
-    management: true,
+    management: false,
   };
 
   const {
@@ -98,7 +92,7 @@ const rowClassName = (record: any, index: number) => {
       key: 'actions',
       title: 'Hành động',
       render: (_: unknown, record: Sender) => (
-        <div>
+        <div className="flex ">
           <Button
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
@@ -160,7 +154,7 @@ const rowClassName = (record: any, index: number) => {
   return <MainLayout>
     <div className="p-4">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl  font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
           Danh sách người gửi
         </h1>
         <div className="flex gap-2">

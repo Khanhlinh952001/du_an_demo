@@ -84,7 +84,7 @@ export const columns: ExtendedColumnType<Recipient>[] = [
     key: 'status',
     width: '10%',
     render: (_, record: Recipient) => (
-      <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${
+      <div className={`flex items-center  px-2 py-1 rounded-full ${
         record.isConfirmed 
           ? 'bg-green-50 text-green-600' 
           : 'bg-red-50 text-red-600'
@@ -92,12 +92,10 @@ export const columns: ExtendedColumnType<Recipient>[] = [
         {record.isConfirmed ? (
           <>
             <CheckCircleOutlined className="text-lg" />
-            <span>Đã xác nhận</span>
           </>
         ) : (
           <>
             <CloseCircleOutlined className="text-lg" />
-            <span>Chưa xác nhận</span>
           </>
         )}
       </div>

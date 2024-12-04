@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Button, type MenuProps } from 'antd';
 import {
-  HomeOutlined,
+  SettingFilled,
   SearchOutlined,
   FileAddOutlined,
   ProfileOutlined,
@@ -42,20 +42,8 @@ const getSidebarItems = (role: string): MenuProps['items'] => {
         children: [
           { 
             key: '4-1', 
-            label: 'Tạo vận đơn', 
-            icon: <FileAddOutlined />,
-            children: [
-              { 
-                key: '4-1-1', 
-                label: <Link href="/pages/orders/create-single" style={{ color: 'inherit' }}>Tạo một đơn</Link>, 
-                icon: <FileAddOutlined /> 
-              },
-              { 
-                key: '4-1-2', 
-                label: <Link href="/pages/orders/create-multiple" style={{ color: 'inherit' }}>Tạo nhiều đơn</Link>, 
-                icon: <FileAddOutlined /> 
-              },
-            ]
+            label: <Link href="/pages/orders" style={{ color: 'inherit' }}>Tạo vận đơn</Link>, 
+            icon: <FileAddOutlined />
           },
           { key: '4-2', label: <Link href="/pages/orders/pickup" style={{ color: 'inherit' }}>Quản lý pickup</Link>, icon: <SendOutlined /> },
           { key: '4-3', label: <Link href="/pages/orders/air" style={{ color: 'inherit' }}>Quản lý đơn bay</Link>, icon: <RocketOutlined /> },
@@ -79,7 +67,6 @@ const getSidebarItems = (role: string): MenuProps['items'] => {
         icon: <TeamOutlined />,
         children: [
           { key: '10-1', label: <Link href="/pages/companies" style={{ color: 'inherit' }}>Danh sách công ty</Link>, icon: <TeamOutlined /> },
-          { key: '10-2', label: <Link href="/pages/companies/create" style={{ color: 'inherit' }}>Thêm công ty mới</Link>, icon: <FileAddOutlined /> },
         ]
       },
     ],
@@ -91,28 +78,28 @@ const getSidebarItems = (role: string): MenuProps['items'] => {
         icon: <FileAddOutlined />, 
         children: [
           { 
-            key: '4-1', 
+            key: '4', 
             label: 'Tạo vận đơn', 
             icon: <FileAddOutlined />,
-            children: [
-              { 
-                key: '4-1-1', 
-                label: <Link href="/pages/orders/create-single" style={{ color: 'inherit' }}>Tạo một đơn</Link>, 
-                icon: <FileAddOutlined /> 
-              },
-              { 
-                key: '4-1-2', 
-                label: <Link href="/pages/orders/create-multiple" style={{ color: 'inherit' }}>Tạo nhiều đơn</Link>, 
-                icon: <FileAddOutlined /> 
-              },
-            ]
+            // children: [
+            //   { 
+            //     key: '4-1-1', 
+            //     label: <Link href="/pages/orders/create-single" style={{ color: 'inherit' }}>Tạo một đơn</Link>, 
+            //     icon: <FileAddOutlined /> 
+            //   },
+            //   { 
+            //     key: '4-1-2', 
+            //     label: <Link href="/pages/orders/create-multiple" style={{ color: 'inherit' }}>Tạo nhiều đơn</Link>, 
+            //     icon: <FileAddOutlined /> 
+            //   },
+            // ]
           },
           { key: '4-2', label: 'Quản lý pickup', icon: <SendOutlined /> },
         ]
       },
       { key: '6', label: 'Công nợ', icon: <DollarOutlined /> },
     ],
-    [ROLES.CHECKER]: [
+    [ROLES.WAREHOUSE_KR || ROLES.WAREHOUSE_VN]: [
       { 
         key: '4', 
         label: 'Quản lý vận đơn',
@@ -130,49 +117,57 @@ const getSidebarItems = (role: string): MenuProps['items'] => {
 
   // Menu items chung cho profile
   const profileItems = [
-    { key: '8', label: <Link href="/profile" style={{ color: 'inherit' }}>Hồ sơ của tôi</Link>, icon: <IdcardOutlined /> },
-    { key: '9', label: <Link href="/about" style={{ color: 'inherit' }}>Giới thiệu</Link>, icon: <InfoCircleOutlined /> },
+    { key: '8', label: <Link href="/pages/settings" style={{ color: 'inherit' }}>Hồ sơ của tôi</Link>, icon: <SettingOutlined /> },
+    { key: '9', label: <Link href="/pages/introduce" style={{ color: 'inherit' }}>Giới thiệu</Link>, icon: <InfoCircleOutlined /> },
   ];
 
   return [...commonItems, ...(roleSpecificItems[role as keyof typeof roleSpecificItems] || []), ...profileItems];
 };
 
+// Tách menu items ra khỏi component chính và đặt ở ngoài để tránh tạo lại mỗi lần render
+const pathToKeyMap: Record<string, string[]> = {
+  '/pages/statistics': ['1'],
+  '/pages/search': ['3'],
+  '/pages/orders': ['4'],
+  // '/pages/orders/create-multiple': ['4', '4-1', '4-1-2'],
+  '/pages/orders/pickup': ['4', '4-2'],
+  '/pages/orders/air': ['4', '4-3'],
+  '/pages/orders/sea': ['4', '4-4'],
+  '/pages/manifest': ['5'],
+  '/pages/debt': ['6'],
+  '/pages/sender': ['7', '7-1'],
+  '/pages/recipients': ['7', '7-2'],
+  '/pages/companies': ['10', '10-1'],
+  '/pages/settings': ['8'],
+  '/pages/introduce': ['9']
+};
+
+// Tách userMenuItems ra ngoài component
+const baseUserMenuItems: MenuProps['items'] = [
+  { key: 'settings', label: 'Cài đặt', icon: <SettingOutlined /> },
+  { key: 'logout', label: 'Đăng xuất', icon: <LoginOutlined /> },
+];
+
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<RoleType>(ROLES.ADMIN);
   const pathName = usePathname();
   
-  // Updated function to get the selected key based on pathname
-  const getSelectedKey = (pathname: string): string[] => {
-    const pathToKeyMap: Record<string, string[]> = {
-      '/pages/statistics': ['1'],
-      '/pages/search': ['3'],
-      '/pages/orders/create-single': ['4', '4-1', '4-1-1'],
-      '/pages/orders/create-multiple': ['4', '4-1', '4-1-2'],
-      '/pages/orders/pickup': ['4', '4-2'],
-      '/pages/orders/air': ['4', '4-3'],
-      '/pages/orders/sea': ['4', '4-4'],
-      '/pages/manifest': ['5'],
-      '/pages/debt': ['6'],
-      '/pages/sender': ['7', '7-1'],
-      '/pages/recipients': ['7', '7-2'],
-      '/pages/companies': ['10', '10-1'],
-      '/pages/companies/create': ['10', '10-2'],
-      '/pages/profile': ['8'],
-      '/pages/about': ['9']
-    };
-    return pathToKeyMap[pathname] || ['1'];
-  };
-
-  const userMenuItems: MenuProps['items'] = [
+  // Sử dụng useMemo để cache menu items
+  const sidebarItems = React.useMemo(() => getSidebarItems(role), [role]);
+  
+  // Sử dụng useMemo cho selectedKeys
+  const selectedKeys = React.useMemo(() => pathToKeyMap[pathName] || ['1'], [pathName]);
+  
+  // Tạo userMenuItems với useMemo
+  const userMenuItems = React.useMemo(() => [
     { 
       key: 'role', 
       label: `Vai trò: ${role}`,
       icon: <UserOutlined />,
       disabled: true 
     },
-    { key: 'settings', label: 'Cài đặt', icon: <SettingOutlined /> },
-    { key: 'logout', label: 'Đăng xuất', icon: <LoginOutlined /> },
-  ];
+    ...baseUserMenuItems,
+  ], [role]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -204,9 +199,9 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={getSelectedKey(pathName)}
-          defaultOpenKeys={getSelectedKey(pathName)}
-          items={getSidebarItems(role)}
+          selectedKeys={selectedKeys}
+          defaultOpenKeys={selectedKeys}
+          items={sidebarItems}
           style={{ 
             border: 'none',
             padding: '0 12px',

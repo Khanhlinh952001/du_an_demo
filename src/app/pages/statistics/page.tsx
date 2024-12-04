@@ -212,21 +212,7 @@ const StatisticsPage = () => {
     { name: 'Nhân viên E', value: 75 },
   ];
 
-  // Thêm Card cho phân tích khách hàng
-  const customerChannelData = [
-    { channel: 'Website', value: 50 },
-    { channel: 'Mobile App', value: 30 },
-    { channel: 'Social Media', value: 20 },
-  ];
 
-  // Convert customerChannelData to Chart.js format
-  const customerChannelChartData = {
-    labels: customerChannelData.map(item => item.channel),
-    datasets: [{
-      data: customerChannelData.map(item => item.value),
-      backgroundColor: ['#1890ff', '#52c41a', '#faad14']
-    }]
-  };
 
   // Thêm Card cho phân tích thanh toán
   const paymentMethodData = [
@@ -666,71 +652,7 @@ const StatisticsPage = () => {
         </Col>
       </Row>
 
-      {/* Thêm Card cho phân tích chi tiết */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Phân tích khách hàng</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <Statistic
-              title="Tỷ lệ khách hàng mới"
-              value={25}
-              suffix="%"
-              prefix={<UserOutlined />}
-            />
-            <Pie data={customerChannelChartData} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Phân tích thanh toán</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <Column
-              data={paymentMethodData}
-              xField="method"
-              yField="value"
-              label={{
-                position: 'top',
-                style: {
-                  fill: '#FFFFFF',
-                  opacity: 0.6,
-                },
-              }}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Thời gian xử lý</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <Progress
-                type="dashboard"
-                percent={75}
-                format={percent => `${percent}%`}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068',
-                }}
-              />
-              <div style={{ marginTop: 16 }}>
-                <Statistic
-                  title="Thời gian xử lý trung bình"
-                  value={2.5}
-                  suffix="ngày"
-                />
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
-
+    
       {/* Thêm Row phân tích so sánh */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={12}>
