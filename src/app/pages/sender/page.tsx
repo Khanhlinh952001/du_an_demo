@@ -232,8 +232,6 @@ export default function SenderPage() {
       />
     </Card>
 
-
-
     <AddSenderModal
       open={isModalOpen}
       onCancel={handleModalCancel}

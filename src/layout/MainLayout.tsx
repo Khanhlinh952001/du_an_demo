@@ -14,7 +14,8 @@ import {
   InfoCircleOutlined,
   BarChartOutlined,
   SettingOutlined,
-  LoginOutlined
+  LoginOutlined,
+  UsergroupAddOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 const { Header, Content, Sider } = Layout;
@@ -27,32 +28,42 @@ const menuItems: MenuProps['items'] = [
   { key: '2', label: <Link href="/pages/statistics" style={{ color: 'inherit' }}>Thống kê</Link>, icon: <BarChartOutlined /> },
   { 
     key: '3', 
-    label: 'Quản lý vận đơn',
     icon: <FileAddOutlined />, 
-    children: [
-      { 
-        key: '3-1', 
-        label: <Link href="/pages/orders" style={{ color: 'inherit' }}>Tạo vận đơn</Link>, 
-        icon: <FileAddOutlined />
-      },
-      { key: '3-2', label: <Link href="/pages/orders/pickup" style={{ color: 'inherit' }}>Quản lý pickup</Link>, icon: <SendOutlined /> },
-      { key: '3-3', label: <Link href="/pages/orders/manage" style={{ color: 'inherit' }}>Quản lý đơn</Link>, icon: <RocketOutlined /> }
-    ]
+    label: <Link href="/pages/orders" style={{ color: 'inherit' }}>Tạo vận đơn</Link>, 
+   
   },
+  
   { key: '4', label: <Link href="/pages/manifest" style={{ color: 'inherit' }}>Tạo manifest</Link>, icon: <ProfileOutlined /> },
   { key: '5', label: <Link href="/pages/debt" style={{ color: 'inherit' }}>Công nợ</Link>, icon: <DollarOutlined /> },
-  { key: '6', label: <Link href="/pages/settings" style={{ color: 'inherit' }}>Cài đặt</Link>, icon: <SettingOutlined /> },
+  { 
+    key: '6',
+    label: 'Danh sách khách hàng',
+    icon: <UsergroupAddOutlined />,
+    children: [
+      { 
+        key: '6-1', 
+        label: <Link href="/pages/sender" style={{ color: 'inherit' }}>Người gửi</Link>,
+        icon: <UserOutlined />
+      },
+      { 
+        key: '6-2', 
+        label: <Link href="/pages/receivers" style={{ color: 'inherit' }}>Người nhận</Link>,
+        icon: <UserOutlined />
+      },
+    ]
+  },
+  { key: '7', label: <Link href="/pages/settings" style={{ color: 'inherit' }}>Cài đặt</Link>, icon: <SettingOutlined /> },
 ];
 
 const pathToKeyMap: Record<string, string[]> = {
   '/pages/search': ['1'],
   '/pages/statistics': ['2'],
-  '/pages/orders': ['3', '3-1'],
-  '/pages/orders/pickup': ['3', '3-2'],
-  '/pages/orders/manage': ['3', '3-3'],
+  '/pages/orders': ['3'],
   '/pages/manifest': ['4'],
   '/pages/debt': ['5'],
-  '/pages/settings': ['6'],
+  '/pages/senders': ['6', '6-1'],
+  '/pages/receivers': ['6', '6-2'],
+  '/pages/settings': ['7'],
 };
 
 // Consolidate header buttons into a configuration array
@@ -79,13 +90,13 @@ const headerButtons = [
     key: 'taekbae',
     icon: <TeamOutlined />,
     label: 'Quản lý taekbae',
-    href: '/pages/orders/manage'
+    href: '/pages/manageTaekbae'
   },
   {
     key: 'intro',
     icon: <InfoCircleOutlined />,
     label: 'Giới thiệu',
-    href: '/pages/orders/manage'
+    href: '/pages/'
   }
 ];
 
@@ -154,24 +165,28 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {headerButtons.map(button => (
               <Button
                 key={button.key}
-                type="text" 
+                type="text"
                 icon={button.icon}
-                className={`text-sm ${
-                  pathName === button.href ? 'bg-blue-500 text-white' : 'bg-white'
-                }`}
+                style={{
+                  fontSize: '14px',
+                  backgroundColor: pathName === button.href ? '#1577ff' : 'white',
+                  color: pathName === button.href ? 'white' : 'inherit'
+                }}
+                onMouseEnter={(e) => {
+                  if (pathName === button.href) {
+                    e.currentTarget.style.backgroundColor = '#1577ff';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (pathName === button.href) {
+                    e.currentTarget.style.backgroundColor = '#1890ff';
+                  }
+                }}
               >
                 <Link href={button.href}>{button.label}</Link>
               </Button>
             ))}
-            <Button
-              type="text" 
-              icon={<QuestionCircleOutlined />}
-              className={`text-sm ${
-                pathName === '/' ? 'bg-green-500' : 'bg-white'
-              }`}
-            >
-              Hướng dẫn sử dụng
-            </Button>
+
           </div>
 
           <div className="flex items-center px-6">
@@ -180,7 +195,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               icon={<InfoCircleOutlined />}
               className="text-sm mr-4"
             >
-              Giới thiệu
+              Hồ sơ của tôi
             </Button>
             <Dropdown 
               menu={{ items: userMenuItems }} 
