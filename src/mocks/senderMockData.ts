@@ -9,12 +9,12 @@ export const senderMockData: Sender[] = [
     name: "Nguyễn Văn A",
     phone: "0901234567",
     facebook: "https://facebook.com/nguyenvana",
-    zalo: "https://zalo.me/0901234567",
+    zalo: "0901234567",
     kakaoTalk: "kakao://user/nguyenvana",
     address: "123 Nguyễn Huệ, Q1, TP.HCM",
-    contactChannel: "Facebook",
+    contactChannels: ["Facebook"],
     orderCount: 15,
-    
+    unitPrice:6000,
     registerDate: "2024-01-01"
   },
   {
@@ -25,12 +25,12 @@ export const senderMockData: Sender[] = [
     name: "Trần Thị B",
     phone: "0909876543",
     facebook: "",
-    zalo: "https://zalo.me/0909876543",
+    zalo: "0909876543",
     kakaoTalk: "",
     address: "456 Lê Lợi, Q5, TP.HCM",
-    contactChannel: "Zalo",
+    contactChannels: ["Zalo"],
     orderCount: 8,
-    unitPrice: 2000000,
+    unitPrice: 8000,
     registerDate: "2024-02-15"
   },
   {
@@ -44,9 +44,13 @@ export const senderMockData: Sender[] = [
     zalo: "",
     kakaoTalk: "kakao://user/parkminyoung",
     address: "789 Hai Bà Trưng, Q3, TP.HCM",
-    contactChannel: "KakaoTalk",
+    contactChannels:[ "KakaoTalk"],
     orderCount: 25,
     unitPrice: 1800000,
     registerDate: "2024-01-20"
   }
 ]; 
+
+export const getSenderInfo = (senderId: string): Sender | undefined => {
+  return senderMockData.find(sender => sender.senderId === senderId);
+};

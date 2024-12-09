@@ -3,6 +3,7 @@ import { Order } from "@/types/Order";
 import { Tag } from "antd";
 import type { ExtendedColumnType } from "../sender/columns";
 import { CalendarOutlined, IdcardOutlined, PhoneOutlined, HomeOutlined, UserOutlined, EnvironmentOutlined, InboxOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
+import { formatDate } from "@/utils/format";
 
 export const columns: ExtendedColumnType<Order>[] = [
   {
@@ -10,6 +11,7 @@ export const columns: ExtendedColumnType<Order>[] = [
     dataIndex: 'createdAt',
     key: 'createdAt',
     width: 120,
+    render: (date: Date) => formatDate(date)
   },
   {
     title: <><IdcardOutlined /> Mã Đơn Hàng</>,

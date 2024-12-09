@@ -1,119 +1,113 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Table, Button, message } from 'antd';
+import { Card, Table, Button, Space, Input } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { Company } from '@/types/Company';
 import MainLayout from '@/layout/MainLayout';
-import { FaBuilding } from 'react-icons/fa';
 import { CompanyMockData } from '@/mocks/CompanyMockData';
+import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
+import { useColumnVisibility } from '@/hooks/useColumnVisibility';
+import { getColumns } from './columns';
+const { Search } = Input;
 
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate API call with mock data
-    const loadMockData = () => {
-      setTimeout(() => {
-        setCompanies(CompanyMockData);
-        setLoading(false);
-      }, 1000); // Giả lập delay 1 giây
-    };
-    
-    loadMockData();
-  }, []);
-
-  const columns = [
-    {
-      title: 'Tên công ty',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a: Company, b: Company) => a.name.localeCompare(b.name),
-    },
-    {
-      title: 'Mã số thuế',
-      dataIndex: 'taxCode',
-      key: 'taxCode',
-    },
-    {
-      title: 'Số giấy phép',
-      dataIndex: 'bizLicenseNumber',
-      key: 'bizLicenseNumber',
-    },
-    {
-      title: 'Địa chỉ',
-      dataIndex: 'address',
-      key: 'address',
-      ellipsis: true,
-    },
-    {
-      title: 'Người đại diện',
-      dataIndex: 'representativeName',
-      key: 'representativeName',
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
-      render: (isActive: boolean) => (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {isActive ? (
-            <><CheckCircleOutlined className="mr-1" />Đang hoạt động</>
-          ) : (
-            <><StopOutlined className="mr-1" />Ngừng hoạt động</>
-          )}
-        </span>
-      ),
-    },
-    {
-      title: 'Thao tác',
-      key: 'actions',
-      render: (_: any, record: Company) => (
-        <div className="flex gap-2">
-          
-          <Button 
-            type="text" 
-            danger 
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            Xóa
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
   const handleEdit = (company: Company) => {
     console.log('Edit company:', company);
-    // Implement edit logic
   };
 
   const handleDelete = (company: Company) => {
     console.log('Delete company:', company);
-    // Implement delete logic
   };
+
+  const columnConfigs = [
+    { key: 'name', label: 'Tên công ty' },
+    { key: 'taxCode', label: 'Mã số thuế' },
+    { key: 'bizLicenseNumber', label: 'Số giấy phép' },
+    { key: 'address', label: 'Địa chỉ' },
+    { key: 'representativeName', label: 'Người đại diện' },
+    { key: 'isActive', label: 'Trạng thái' },
+    { key: 'actions', label: 'Thao tác' }
+  ];
+
+  const defaultVisibleColumns = {
+    name: true,
+    taxCode: true,
+    bizLicenseNumber: true,
+    address: true,
+    representativeName: true,
+    isActive: true,
+  };
+
+  const {
+    visibleColumns,
+    handleColumnVisibilityChange,
+    filteredColumns
+  } = useColumnVisibility(getColumns({ handleEdit, handleDelete }), defaultVisibleColumns);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setCompanies(CompanyMockData);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-10">
+      <Card className="shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Quản lý công ty
+          </h1>
+          <p className="text-gray-500 mt-1 mb-4">Quản lý và theo dõi thông tin công ty</p>
+        </div>
+
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Quản lý công ty</h1>
-          <Button>
-            <PlusOutlined className="mr-2 h-4 w-4" />
-            Thêm công ty mới
-          </Button>
+          <div>
+            <Space>
+              <Search
+                placeholder="Tìm kiếm công ty"
+                style={{ width: 300 }}
+                // TODO: Implement search functionality
+              />
+            </Space>
+          </div>
+          <div className="flex space-x-3">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => console.log('Add new company')}
+            >
+              Thêm công ty mới
+            </Button>
+          </div>
+        </div>
+
+        <div className="mb-4 bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-600 mb-2">Tùy chỉnh hiển thị</h3>
+          <ColumnVisibilityControl
+            columns={columnConfigs}
+            visibleColumns={visibleColumns}
+            onChange={handleColumnVisibilityChange}
+          />
         </div>
 
         <Table
-          columns={columns}
+          columns={filteredColumns}
           dataSource={companies}
           loading={loading}
+          rowKey="id"
+          scroll={{ x: 1500 }}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Tổng ${total} công ty`,
+          }}
         />
-      </div>
+      </Card>
     </MainLayout>
   );
 }

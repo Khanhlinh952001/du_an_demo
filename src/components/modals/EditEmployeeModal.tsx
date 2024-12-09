@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Select } from 'antd';
+import { Modal, Form, Input, Select, message } from 'antd';
 import { UserOutlined, TeamOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
-import { ROLES } from '@/constants/constants';
-import type { RoleType } from '@/constants/constants';
+import { ROLES } from '@/constants';
+import type { RoleType } from '@/constants';
 import { values } from '@ant-design/plots/es/core/utils';
 import { ROLE_SELECT_OPTIONS, DEPARTMENT_SELECT_OPTIONS } from '@/constants/selectOptions';
+import { generateRandomPassword } from '@/utils/passwordUtils';
+// import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface Employee {
   employeeId: string;
@@ -14,6 +17,7 @@ interface Employee {
   role: RoleType;
   department: string;
   updatedAt?: Date;
+  password?: string;
 }
 
 interface EditEmployeeModalProps {
@@ -34,27 +38,49 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (mode === 'edit' && initialData) {
+    if (mode === 'add') {
+      form.setFieldsValue({
+        password: generateRandomPassword(),
+        employeeId: `NV${Date.now().toString().slice(-6)}`
+      });
+    } else if (mode === 'edit' && initialData) {
       form.setFieldsValue(initialData);
-    } else if (mode === 'add') {
-      form.resetFields();
     }
   }, [initialData, form, mode, open]);
 
   const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      onSubmit({
-        ...values,
-        updatedAt: new Date(),
-      });
-      form.resetFields();
-    } catch (error) {
-      console.error('Validation failed:', error);
-    }
+    // try {
+    //   const values = await form.validateFields();
+      
+    //   if (mode === 'add') {
+    //     // Tạo tài khoản Firebase cho nhân viên mới
+    //     const email = `${values.employeeId}@yourdomain.com`; // Hoặc sử dụng email thật
+    //     const userCredential = await createUserWithEmailAndPassword(
+    //       auth,
+    //       email,
+    //       values.password
+    //     );
+
+    //     // Thêm thông tin nhân viên vào Firestore
+    //     onSubmit({
+    //       ...values,
+    //       uid: userCredential.user.uid, // Lưu UID của Firebase user
+    //       updatedAt: new Date(),
+    //     });
+    //   } else {
+    //     // Xử lý cập nhật thông tin
+    //     onSubmit({
+    //       ...values,
+    //       updatedAt: new Date(),
+    //     });
+    //   }
+      
+    //   form.resetFields();
+    // } catch (error) {
+    //   console.error('Error:', error);
+    //   message.error('Có lỗi xảy ra khi tạo tài khoản');
+    // }
   };
-
-
 
   return (
     <Modal
@@ -110,6 +136,17 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
               <Input 
                 disabled={true}
                 placeholder="Mã nhân viên sẽ được tạo tự động"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Mật khẩu"
+              rules={[{ required: true, message: 'Mật khẩu là bắt buộc' }]}
+            >
+              <Input.Password 
+                placeholder={mode === 'add' ? "Mật khẩu sẽ được tạo tự động" : "Nhập mật khẩu mới"}
+                disabled={mode === 'add'}
               />
             </Form.Item>
           </div>

@@ -1,4 +1,4 @@
-import { RoleType } from "@/constants/constants";
+import { RoleType } from "@/constants";
 export interface Employee {
     employeeId: string;         // Mã nhân viên (unique identifier)
     manageId: string;           // ID của Admin quản lý nhân viên này

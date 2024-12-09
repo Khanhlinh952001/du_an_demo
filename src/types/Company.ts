@@ -24,4 +24,31 @@ export interface Company {
     note?: string;             // Ghi chú
     createdAt: Date;           // Ngày tạo
     updatedAt: Date;           // Ngày cập nhật
+    
+    // Additional fields
+    logo?: string;            // URL logo công ty
+    branches?: Branch[];      // Các chi nhánh
+    bankAccounts?: BankAccount[]; // Tài khoản ngân hàng
+    businessScope?: string[]; // Phạm vi kinh doanh
+    certifications?: {        // Chứng nhận
+        name: string;
+        number: string;
+        validUntil: Date;
+    }[];
+}
+
+interface Branch {
+    branchId: string;
+    name: string;
+    address: string;
+    phone: string;
+    manager: string;
+}
+
+interface BankAccount {
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+    branch?: string;
+    swift?: string;
 } 

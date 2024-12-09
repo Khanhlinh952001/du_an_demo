@@ -3,7 +3,7 @@ import MainLayout from "@/layout/MainLayout";
 import AddSenderModal from '@/components/modals/AddSenderModal';
 import { useState, useEffect } from 'react';
 import type { Sender } from '@/types/Sender';
-import { Table, Button, Checkbox, Modal } from 'antd';
+import { Table, Button, Checkbox, Modal, Input, Card } from 'antd';
 import { senderMockData } from '@/mocks/senderMockData';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
@@ -13,6 +13,7 @@ import RecipientPage from "../recipients/page";
 import * as XLSX from 'xlsx';
 import { senderExportConfig, createExportData } from '@/configs/exportConfig';
 import ExportModal from '@/components/common/ExportModal';
+import RecipientList from "@/components/recipients/RecipientList";
 
 export default function SenderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,10 +23,11 @@ export default function SenderPage() {
   const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
   const [selectedSenderId, setSelectedSenderId] = useState<string | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  
-const rowClassName = (record: any, index: number) => {
-  return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-};
+  const [searchResults, setSearchResults] = useState<Sender[]>(senderMockData);
+
+  const rowClassName = (record: any, index: number) => {
+    return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+  };
 
   const columnConfigs = [
     { key: 'senderId', label: 'Mã KH' },
@@ -55,7 +57,7 @@ const rowClassName = (record: any, index: number) => {
     visibleColumns,
     handleColumnVisibilityChange,
     filteredColumns
-  } = useColumnVisibility(columns,defaultVisibleColumns);
+  } = useColumnVisibility(columns, defaultVisibleColumns);
 
   useEffect(() => {
     setSenders(senderMockData);
@@ -86,6 +88,19 @@ const rowClassName = (record: any, index: number) => {
     setModalMode('add');
   };
 
+  const handleSearch = (value: string) => {
+    if (!value.trim()) {
+      setSearchResults(senders);
+      return;
+    }
+
+    const filtered = senders.filter(sender =>
+      sender.name.toLowerCase().includes(value.toLowerCase()) ||
+      sender.phone.includes(value)
+    );
+    setSearchResults(filtered);
+  };
+
   const columnsWithActions = [
     ...filteredColumns,
     {
@@ -105,14 +120,14 @@ const rowClassName = (record: any, index: number) => {
             style={{ marginRight: 8 }}
           />
           <Button
-          icon={<UsergroupAddOutlined />}
+            icon={<UsergroupAddOutlined />}
             onClick={() => {
               setSelectedSenderId(record.senderId);
               setIsRecipientModalOpen(true);
             }}
           />
-           
-          
+
+
         </div>
       ),
     },
@@ -125,7 +140,7 @@ const rowClassName = (record: any, index: number) => {
 
   const handleExport = (selectedFields: string[]) => {
     const exportData = createExportData(senders, selectedFields, senderExportConfig);
-    
+
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Danh sách người gửi");
@@ -152,12 +167,21 @@ const rowClassName = (record: any, index: number) => {
   };
 
   return <MainLayout>
-    <div className="p-4">
+    <Card>
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl  font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-          Danh sách người gửi
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Danh sách  Người Gửi
+          </h1>
+          <p className="text-gray-500 mt-1 mb-4">Quản lý và theo dõi người gửi</p>
+        </div>
         <div className="flex gap-2">
+          <Input.Search
+            placeholder="Tìm theo tên/số điện thoại"
+            onSearch={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ width: 300 }}
+          />
           <Button
             icon={<DownloadOutlined />}
             onClick={() => setIsExportModalOpen(true)}
@@ -165,7 +189,7 @@ const rowClassName = (record: any, index: number) => {
           >
             Xuất Excel
           </Button>
-          <label htmlFor="upload-excel" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded cursor-pointer flex items-center gap-2">
+          <label htmlFor="upload-excel" className="bg-blue-500 hover:bg-blue-600 text-white px-4 h-8 rounded cursor-pointer flex items-center gap-2">
             <UploadOutlined />
             Cập nhật từ Excel
             <input
@@ -176,13 +200,13 @@ const rowClassName = (record: any, index: number) => {
               style={{ display: 'none' }}
             />
           </label>
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             onClick={() => setIsModalOpen(true)}
           >
             Thêm người gửi
           </Button>
-          
+
         </div>
       </div>
 
@@ -192,11 +216,12 @@ const rowClassName = (record: any, index: number) => {
         onChange={handleColumnVisibilityChange}
         className="mb-4"
       />
-      
-      <Table 
+
+      <Table
         columns={columnsWithActions}
-        dataSource={senders}
+        dataSource={searchResults}
         rowKey="id"
+        size="small"
         rowClassName={rowClassName}
         className="bg-white rounded-lg shadow-sm"
         pagination={{
@@ -205,11 +230,11 @@ const rowClassName = (record: any, index: number) => {
           showTotal: (total) => `Tổng số ${total} người gửi`,
         }}
       />
-    </div>
+    </Card>
 
-    
 
-    <AddSenderModal 
+
+    <AddSenderModal
       open={isModalOpen}
       onCancel={handleModalCancel}
       onSubmit={handleSubmit}
@@ -224,7 +249,7 @@ const rowClassName = (record: any, index: number) => {
       width={1200}
       footer={null}
     >
-      <RecipientPage senderId={selectedSenderId} />
+      <RecipientList senderId={selectedSenderId || ''} />
     </Modal>
 
     <ExportModal

@@ -7,5 +7,11 @@ export interface Payment {
     paidAt: Date;         // Thời gian thanh toán
     createdAt: Date;      // Ngày tạo thanh toán
     updatedAt: Date;      // Ngày cập nhật thanh toán
-  }
+    transactionId?: string;    // Mã giao dịch từ cổng thanh toán
+    currency: string;          // Loại tiền tệ
+    paymentProof?: string;     // URL chứng từ thanh toán
+    refundStatus?: 'none' | 'pending' | 'completed';
+    refundAmount?: number;
+    paymentNote?: string;
+}
   

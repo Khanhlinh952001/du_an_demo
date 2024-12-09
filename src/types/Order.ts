@@ -1,4 +1,4 @@
-import { ITEM_TYPES, ORDER_STATUS, PAYMENT_STATUS } from "@/constants/constants";
+import { ITEM_TYPES, ORDER_STATUS, PAYMENT_STATUS } from "@/constants";
 
 export interface Order {
     // IDs and References
@@ -19,8 +19,8 @@ export interface Order {
     receiverAddress: string;  // Địa chỉ người nhận
     receiverRegion: string;    // SĐT người nhận
     // Shipping Information
-    origin: string;           // Nơi gửi (VN/KR)
-    destination: string;      // Nơi nhận (VN/KR)
+    // origin: string;           // Nơi gửi (VN/KR)
+    // destination: string;      // Nơi nhận (VN/KR)
     serviceType: 'air' | 'sea'; // Loại dịch vụ
     shippingType: 'import' | 'export'; // Hình thức vận chuyển
     price:number,
@@ -31,17 +31,45 @@ export interface Order {
     trackingNumber: string;   // Mã tracking
     
     // Dates
-    shipmentDate: Date;       // Ngày gửi
-    deliveryDate: Date;       // Ngày nhận dự kiến
-    createdAt: Date | string;
-    updatedAt: Date;
+    shipmentDate?: Date | string;       // Ngày gửi
+    deliveryDate?: Date |string;       // Ngày nhận dự kiến
+    createdAt: Date | string; 
+    updatedAt: Date | string;
     
     // Status and Payment
     status: OrderStatus;      // Trạng thái đơn hàng
     paymentStatus: PaymentStatus; // Trạng thái thanh toán
     totalAmount: number;      // Tổng tiền
     note?: string;            // Ghi chú
+    paidAmount?: number;
+    remainingAmount?: number;
+    
+    // Additional suggested fields
+    orderCode?: string;        // Mã đơn hàng bổ sung (có thể dùng cho mã vận đơn quốc tế)
+    items?: OrderItem[];       // Chi tiết các mặt hàng trong đơn
+    history?: OrderHistory[];  // Lịch sử thay đổi trạng thái
+    attachments?: string[];    // Danh sách file đính kèm
+    customsDeclaration?: string; // Số tờ khai hải quan
+    insurance?: boolean;       // Có bảo hiểm không
+    priority?: 'low' | 'medium' | 'high'; // Độ ưu tiên của đơn hàng
 }
+
+
+interface OrderItem {
+    itemId: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    description?: string;
+}
+
+interface OrderHistory {
+    timestamp: Date;
+    status: OrderStatus;
+    note?: string;
+    updatedBy: string;
+}
+
 
 export type ItemType = typeof ITEM_TYPES[keyof typeof ITEM_TYPES];
 export type OrderStatus = typeof ORDER_STATUS[keyof typeof ORDER_STATUS];

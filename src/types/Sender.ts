@@ -9,7 +9,7 @@ export interface Sender {
     zalo: string;             // Tài khoản Zalo
     kakaoTalk: string;        // Tài khoản KakaoTalk
     address: string;          // Địa chỉ
-    contactChannel: string;   // Kênh liên hệ (Facebook, Zalo, KakaoTalk, v.v.)
+    contactChannels: string[];   // Kênh liên hệ (Facebook, Zalo, KakaoTalk, v.v.)
     orderCount?: number;      // Số đơn hàng đã đặt (tùy chọn)
     unitPrice?: number;       // Giá đơn vị của khách hàng
     registerDate: string;     // Ngày đăng ký

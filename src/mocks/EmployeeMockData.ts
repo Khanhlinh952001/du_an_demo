@@ -1,5 +1,5 @@
 import { Employee } from "@/types/Employee";
-import { ROLES } from "@/constants/constants";
+import { ROLES } from "@/constants";
 
 export const EmployeeMockData: Employee[] = [
   {
@@ -9,7 +9,7 @@ export const EmployeeMockData: Employee[] = [
     email: "an.nguyen@company.com",
     password: "hashedPassword123",
     phone: "0901234567",
-    role: ROLES.CHECKER,
+    role: ROLES.WAREHOUSE_KR,
     department: "Vận chuyển",
     isActive: true,
     hireDate: "2024-01-15",

@@ -1,5 +1,5 @@
 import { User } from "@/types/User";
-import { ROLES, PERMISSIONS } from "@/constants/constants";
+import { ROLES, PERMISSIONS } from "@/constants";
 
 export const UserMockData: User[] = [
   {

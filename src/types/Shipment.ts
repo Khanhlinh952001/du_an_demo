@@ -8,5 +8,17 @@ export interface Shipment {
     trackingNumber: string;  // Số theo dõi
     createdAt: Date;      // Ngày tạo vận chuyển
     updatedAt: Date;      // Ngày cập nhật vận chuyển
-  }
+    carrier?: string;           // Đơn vị vận chuyển
+    containerNumber?: string;  // Số container
+    customsClearance?: {      // Thông tin hải quan
+        status: string;
+        clearanceDate?: Date;
+        documents?: string[];
+    };
+    transitPoints?: {         // Điểm trung chuyển
+        location: string;
+        arrivalTime: Date;
+        departureTime: Date;
+    }[];
+}
   

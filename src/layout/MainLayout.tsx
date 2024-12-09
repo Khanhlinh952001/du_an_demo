@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Button, type MenuProps } from 'antd';
 import {
-  SettingFilled,
   SearchOutlined,
   FileAddOutlined,
   ProfileOutlined,
@@ -12,8 +11,6 @@ import {
   QuestionCircleOutlined,
   SendOutlined,
   RocketOutlined,
-  ShopOutlined,
-  IdcardOutlined,
   InfoCircleOutlined,
   BarChartOutlined,
   SettingOutlined,
@@ -22,152 +19,98 @@ import {
 import Link from 'next/link';
 const { Header, Content, Sider } = Layout;
 
-import { ROLES ,RoleType} from '@/constants/constants';
+import { ROLES ,RoleType} from '@/constants';
 import { usePathname} from 'next/navigation';
-// Function to get menu items based on user role
-const getSidebarItems = (role: string): MenuProps['items'] => {
-  // Menu items chung cho tất cả các role
-  const commonItems = [
-    { key: '1', label: <Link href="/pages/statistics" style={{ color: 'inherit' }}>Thống kê</Link>, icon: <BarChartOutlined /> },
-    { key: '3', label: <Link href="/pages/search" style={{ color: 'inherit' }}>Tra cứu</Link>, icon: <SearchOutlined /> },
-  ];
 
-  // Menu items cho từng role cụ thể
-  const roleSpecificItems = {
-    [ROLES.ADMIN]: [
+const menuItems: MenuProps['items'] = [
+  { key: '1', label: <Link href="/pages/search" style={{ color: 'inherit' }}>Tra cứu</Link>, icon: <SearchOutlined /> },
+  { key: '2', label: <Link href="/pages/statistics" style={{ color: 'inherit' }}>Thống kê</Link>, icon: <BarChartOutlined /> },
+  { 
+    key: '3', 
+    label: 'Quản lý vận đơn',
+    icon: <FileAddOutlined />, 
+    children: [
       { 
-        key: '4', 
-        label: 'Quản lý vận đơn',
-        icon: <FileAddOutlined />, 
-        children: [
-          { 
-            key: '4-1', 
-            label: <Link href="/pages/orders" style={{ color: 'inherit' }}>Tạo vận đơn</Link>, 
-            icon: <FileAddOutlined />
-          },
-          { key: '4-2', label: <Link href="/pages/orders/pickup" style={{ color: 'inherit' }}>Quản lý pickup</Link>, icon: <SendOutlined /> },
-          { key: '4-3', label: <Link href="/pages/orders/air" style={{ color: 'inherit' }}>Quản lý đơn bay</Link>, icon: <RocketOutlined /> },
-          { key: '4-4', label: <Link href="/pages/orders/sea" style={{ color: 'inherit' }}>Quản lý đơn biển</Link>, icon: <ShopOutlined /> },
-        ]
+        key: '3-1', 
+        label: <Link href="/pages/orders" style={{ color: 'inherit' }}>Tạo vận đơn</Link>, 
+        icon: <FileAddOutlined />
       },
-      { key: '5', label: <Link href="/pages/manifest" style={{ color: 'inherit' }}>Tạo manifest</Link>, icon: <ProfileOutlined /> },
-      { key: '6', label: <Link href="/pages/debt" style={{ color: 'inherit' }}>Công nợ</Link>, icon: <DollarOutlined /> },
-      { 
-        key: '7', 
-        label: 'Quản lý khách hàng',
-        icon: <UserOutlined />,
-        children: [
-          { key: '7-1', label: <Link href="/pages/sender" style={{ color: 'inherit' }}>Danh sách người gửi </Link>, icon: <UserOutlined /> },
-          { key: '7-2', label: <Link href="/pages/recipients" style={{ color: 'inherit' }}>Danh sách người nhận</Link>, icon: <TeamOutlined /> },
-        ]
-      },
-      { 
-        key: '10', 
-        label: 'Quản lý công ty', 
-        icon: <TeamOutlined />,
-        children: [
-          { key: '10-1', label: <Link href="/pages/companies" style={{ color: 'inherit' }}>Danh sách công ty</Link>, icon: <TeamOutlined /> },
-        ]
-      },
-    ],
-    [ROLES.MANAGER]: [
-      { key: '2', label: <Link href="/statistics">Thống kê</Link>, icon: <BarChartOutlined /> },
-      { 
-        key: '4', 
-        label: 'Quản lý vận đơn',
-        icon: <FileAddOutlined />, 
-        children: [
-          { 
-            key: '4', 
-            label: 'Tạo vận đơn', 
-            icon: <FileAddOutlined />,
-            // children: [
-            //   { 
-            //     key: '4-1-1', 
-            //     label: <Link href="/pages/orders/create-single" style={{ color: 'inherit' }}>Tạo một đơn</Link>, 
-            //     icon: <FileAddOutlined /> 
-            //   },
-            //   { 
-            //     key: '4-1-2', 
-            //     label: <Link href="/pages/orders/create-multiple" style={{ color: 'inherit' }}>Tạo nhiều đơn</Link>, 
-            //     icon: <FileAddOutlined /> 
-            //   },
-            // ]
-          },
-          { key: '4-2', label: 'Quản lý pickup', icon: <SendOutlined /> },
-        ]
-      },
-      { key: '6', label: 'Công nợ', icon: <DollarOutlined /> },
-    ],
-    [ROLES.WAREHOUSE_KR || ROLES.WAREHOUSE_VN]: [
-      { 
-        key: '4', 
-        label: 'Quản lý vận đơn',
-        icon: <FileAddOutlined />, 
-        children: [
-          { key: '4-2', label: 'Quản lý pickup', icon: <SendOutlined /> },
-        ]
-      },
-    ],
-    [ROLES.ACCOUNTANT]: [
-      { key: '2', label: <Link href="/statistics">Thống kê</Link>, icon: <BarChartOutlined /> },
-      { key: '6', label: 'Công nợ', icon: <DollarOutlined /> },
-    ],
-  };
+      { key: '3-2', label: <Link href="/pages/orders/pickup" style={{ color: 'inherit' }}>Quản lý pickup</Link>, icon: <SendOutlined /> },
+      { key: '3-3', label: <Link href="/pages/orders/manage" style={{ color: 'inherit' }}>Quản lý đơn</Link>, icon: <RocketOutlined /> }
+    ]
+  },
+  { key: '4', label: <Link href="/pages/manifest" style={{ color: 'inherit' }}>Tạo manifest</Link>, icon: <ProfileOutlined /> },
+  { key: '5', label: <Link href="/pages/debt" style={{ color: 'inherit' }}>Công nợ</Link>, icon: <DollarOutlined /> },
+  { key: '6', label: <Link href="/pages/settings" style={{ color: 'inherit' }}>Cài đặt</Link>, icon: <SettingOutlined /> },
+];
 
-  // Menu items chung cho profile
-  const profileItems = [
-    { key: '8', label: <Link href="/pages/settings" style={{ color: 'inherit' }}>Hồ sơ của tôi</Link>, icon: <SettingOutlined /> },
-    { key: '9', label: <Link href="/pages/introduce" style={{ color: 'inherit' }}>Giới thiệu</Link>, icon: <InfoCircleOutlined /> },
-  ];
-
-  return [...commonItems, ...(roleSpecificItems[role as keyof typeof roleSpecificItems] || []), ...profileItems];
-};
-
-// Tách menu items ra khỏi component chính và đặt ở ngoài để tránh tạo lại mỗi lần render
 const pathToKeyMap: Record<string, string[]> = {
-  '/pages/statistics': ['1'],
-  '/pages/search': ['3'],
-  '/pages/orders': ['4'],
-  // '/pages/orders/create-multiple': ['4', '4-1', '4-1-2'],
-  '/pages/orders/pickup': ['4', '4-2'],
-  '/pages/orders/air': ['4', '4-3'],
-  '/pages/orders/sea': ['4', '4-4'],
-  '/pages/manifest': ['5'],
-  '/pages/debt': ['6'],
-  '/pages/sender': ['7', '7-1'],
-  '/pages/recipients': ['7', '7-2'],
-  '/pages/companies': ['10', '10-1'],
-  '/pages/settings': ['8'],
-  '/pages/introduce': ['9']
+  '/pages/search': ['1'],
+  '/pages/statistics': ['2'],
+  '/pages/orders': ['3', '3-1'],
+  '/pages/orders/pickup': ['3', '3-2'],
+  '/pages/orders/manage': ['3', '3-3'],
+  '/pages/manifest': ['4'],
+  '/pages/debt': ['5'],
+  '/pages/settings': ['6'],
 };
 
-// Tách userMenuItems ra ngoài component
-const baseUserMenuItems: MenuProps['items'] = [
-  { key: 'settings', label: 'Cài đặt', icon: <SettingOutlined /> },
-  { key: 'logout', label: 'Đăng xuất', icon: <LoginOutlined /> },
+// Consolidate header buttons into a configuration array
+const headerButtons = [
+  { 
+    key: 'pickup',
+    icon: <SendOutlined />,
+    label: 'Quản lý pickup',
+    href: '/pages/orders/pickup'
+  },
+  {
+    key: 'air',
+    icon: <RocketOutlined />,
+    label: 'Quản lý đơn bay',
+    href: '/pages/manageAir'
+  },
+  {
+    key: 'sea',
+    icon: <ProfileOutlined />,
+    label: 'Quản lý đơn biển',
+    href: '/pages/manageSea'
+  },
+  {
+    key: 'taekbae',
+    icon: <TeamOutlined />,
+    label: 'Quản lý taekbae',
+    href: '/pages/orders/manage'
+  },
+  {
+    key: 'intro',
+    icon: <InfoCircleOutlined />,
+    label: 'Giới thiệu',
+    href: '/pages/orders/manage'
+  }
+];
+
+const userMenuItems: MenuProps['items'] = [
+  {
+    key: 'profile',
+    icon: <UserOutlined />,
+    label: <Link href="/pages/profile">Hồ sơ của tôi</Link>
+  },
+  {
+    type: 'divider'
+  },
+  {
+    key: 'logout',
+    icon: <LoginOutlined />,
+    label: 'Đăng xuất'
+  }
 ];
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<RoleType>(ROLES.ADMIN);
   const pathName = usePathname();
-  
-  // Sử dụng useMemo để cache menu items
-  const sidebarItems = React.useMemo(() => getSidebarItems(role), [role]);
-  
-  // Sử dụng useMemo cho selectedKeys
-  const selectedKeys = React.useMemo(() => pathToKeyMap[pathName] || ['1'], [pathName]);
-  
-  // Tạo userMenuItems với useMemo
-  const userMenuItems = React.useMemo(() => [
-    { 
-      key: 'role', 
-      label: `Vai trò: ${role}`,
-      icon: <UserOutlined />,
-      disabled: true 
-    },
-    ...baseUserMenuItems,
-  ], [role]);
+  const selectedKeys = React.useMemo(() => {
+    const keys = pathToKeyMap[pathName] || [''];
+    return [keys[0]];
+  }, [pathName]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -201,64 +144,52 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           mode="inline"
           selectedKeys={selectedKeys}
           defaultOpenKeys={selectedKeys}
-          items={sidebarItems}
-          style={{ 
-            border: 'none',
-            padding: '0 12px',
-          }}
+          items={menuItems}
+          style={{ border: 'none', padding: '0 12px' }}
         />
       </Sider>
-
-      <Layout style={{ 
-        marginLeft: 240,
-      }}>
-        <Header style={{ 
-          background: '#fff', 
-          padding: 0, 
-          height: '64px',
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'flex-end',
-            height: '100%',
-            padding: '0 24px'
-          }}>
-            <Button 
+      <Layout style={{ marginLeft: 240 }}>
+        <Header className="bg-white p-0 h-[64px] shadow-sm sticky top-0 z-[1000] flex justify-between">
+          <div className="flex items-center space-x-2 h-full px-6">
+            {headerButtons.map(button => (
+              <Button
+                key={button.key}
+                type="text" 
+                icon={button.icon}
+                className={`text-sm ${
+                  pathName === button.href ? 'bg-blue-500 text-white' : 'bg-white'
+                }`}
+              >
+                <Link href={button.href}>{button.label}</Link>
+              </Button>
+            ))}
+            <Button
               type="text" 
               icon={<QuestionCircleOutlined />}
-              style={{ 
-                fontSize: '14px',
-                color: '#4B5563'
-              }}
+              className={`text-sm ${
+                pathName === '/' ? 'bg-green-500' : 'bg-white'
+              }`}
             >
               Hướng dẫn sử dụng
             </Button>
-            <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-              <div style={{ 
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center',
-                marginLeft: 16
-              }}>
-                <Avatar 
-                  icon={<UserOutlined />} 
-                  style={{ backgroundColor: '#E5E7EB' }}
-                />
-                <span style={{ 
-                  marginLeft: 8,
-                  color: '#111927',
-                  fontSize: '14px'
-                }}>Tài khoản</span>
-                <DownOutlined style={{ 
-                  marginLeft: 8,
-                  fontSize: '12px',
-                  color: '#6B7280'
-                }} />
+          </div>
+
+          <div className="flex items-center px-6">
+            <Button
+              type="text" 
+              icon={<InfoCircleOutlined />}
+              className="text-sm mr-4"
+            >
+              Giới thiệu
+            </Button>
+            <Dropdown 
+              menu={{ items: userMenuItems }} 
+              trigger={['click']} 
+              placement="bottomRight"
+            >
+              <div className="flex items-center cursor-pointer">
+                <Avatar icon={<UserOutlined />} />
+                <DownOutlined className="ml-2 text-gray-500" />
               </div>
             </Dropdown>
           </div>

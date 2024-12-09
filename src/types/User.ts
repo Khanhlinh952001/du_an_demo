@@ -1,4 +1,4 @@
-import { RoleType, PermissionType } from "@/constants/constants";
+import { RoleType, PermissionType } from "@/constants";
 
 export interface User {
   id: string; // ID người dùng

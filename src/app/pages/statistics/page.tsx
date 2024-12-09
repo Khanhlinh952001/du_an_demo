@@ -156,22 +156,7 @@ const StatisticsPage = () => {
     },
   };
 
-  // Data cho biểu đồ thanh toán
-  const paymentData = [
-    { type: 'Đã thanh toán', value: 70 },
-    { type: 'Chưa thanh toán', value: 30 },
-  ];
 
-  // Thay thế cấu hình biểu đồ tròn
-  const paymentChartData = {
-    labels: ['Đã thanh toán', 'Chưa thanh toán'],
-    datasets: [
-      {
-        data: [70, 30],
-        backgroundColor: ['#52c41a', '#fff1f0'],
-      },
-    ],
-  };
 
 
   // Data top khách hàng
@@ -213,14 +198,6 @@ const StatisticsPage = () => {
   ];
 
 
-
-  // Thêm Card cho phân tích thanh toán
-  const paymentMethodData = [
-    { method: 'Credit Card', value: 60 },
-    { method: 'PayPal', value: 20 },
-    { method: 'Bank Transfer', value: 10 },
-    { method: 'Cash', value: 10 },
-  ];
 
   // Data so sánh theo khu vực và thời gian
   const compareData = {
@@ -350,6 +327,8 @@ const StatisticsPage = () => {
 
   return (
     <MainLayout>
+      <Card>
+
       <Title level={2}>Thống kê</Title>
 
       {/* Thêm bộ lọc và nút xuất báo cáo */}
@@ -404,7 +383,7 @@ const StatisticsPage = () => {
           <Card hoverable style={{ backgroundColor: '#e6f7ff', borderRadius: 8 }}>
             <Statistic
               title={<span style={{ color: '#0050b3', fontSize: 16, fontWeight: 600 }}>Tổng khách hàng</span>}
-              value={1000}
+              value={0}
               prefix={<TeamOutlined style={{ color: '#1890ff' }} />}
               valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
             />
@@ -423,7 +402,7 @@ const StatisticsPage = () => {
         <Col span={6}>
           <Card hoverable style={{ backgroundColor: '#fff7e6', borderRadius: 8 }}>
             <Statistic
-              title={<span style={{ color: '#d46b08', fontSize: 16, fontWeight: 600 }}>Doanh thu (theo bộ lọc)</span>}
+              title={<span style={{ color: '#d46b08', fontSize: 16, fontWeight: 600 }}>Doanh thu </span>}
               value={filteredData.totalRevenue}
               prefix={<DollarOutlined style={{ color: '#fa8c16' }} />}
               suffix="VNĐ"
@@ -435,7 +414,7 @@ const StatisticsPage = () => {
           <Card hoverable style={{ backgroundColor: '#f9f0ff', borderRadius: 8 }}>
             <Statistic
               title={<span style={{ color: '#531dab', fontSize: 16, fontWeight: 600 }}>Người nhận</span>}
-              value={2700}
+              value={0}
               prefix={<UserOutlined style={{ color: '#722ed1' }} />}
               valueStyle={{ color: '#722ed1', fontWeight: 'bold' }}
             />
@@ -452,7 +431,7 @@ const StatisticsPage = () => {
             hoverable
           >
             <Statistic
-              value={2500000000}
+              value={0}
               prefix={<CreditCardOutlined style={{ color: '#722ed1' }} />}
               suffix="VNĐ"
               valueStyle={{ color: '#722ed1', fontWeight: 'bold', fontSize: 24 }}
@@ -469,7 +448,7 @@ const StatisticsPage = () => {
             hoverable
           >
             <Statistic
-              value={1800000000}
+              value={0}
               prefix={<DollarOutlined style={{ color: '#52c41a' }} />}
               suffix="VNĐ"
               valueStyle={{ color: '#52c41a', fontWeight: 'bold', fontSize: 24 }}
@@ -657,7 +636,7 @@ const StatisticsPage = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Miền Bắc (theo bộ lọc)</span>}
+            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Miền Bắc</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >
@@ -744,6 +723,8 @@ const StatisticsPage = () => {
           </Card>
         </Col>
       </Row>
+      </Card>
+
     </MainLayout>
   );
 };
