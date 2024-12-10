@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react';
 import { Order } from '@/types/Order';
-import { Card, Form, Input, DatePicker, Select, Button, Table, Space, Tabs } from 'antd';
+import { Card, Form, Input, DatePicker, Select, Button, Table, Space, Tabs, Row, Col } from 'antd';
 import { SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ColumnType, ColumnGroupType } from 'antd/es/table';
 import MainLayout from '@/layout/MainLayout';
@@ -15,35 +15,60 @@ import * as XLSX from 'xlsx';
 import { orderExportConfig, createExportData } from '@/configs/exportConfig';
 import ExportModal from '@/components/common/ExportModal';
 import { formatDate } from '@/utils/format';
-import { filterByDateRange, filterBySender, filterByReceiver, filterByRegion, filterByPaymentStatus, filterByOrderType } from '@/utils/filters';
+import { 
+    filterByDateRange, 
+    filterBySender, 
+    filterByReceiver, 
+    filterByRegion, 
+    filterByPaymentStatus, 
+    filterByOrderType,
+    filterByServiceType 
+} from '@/utils/filters';
+import SearchModal from '@/components/common/SearchModal';
+
 export default function SearchPage() {
     const [form] = Form.useForm();
     const [activeTab, setActiveTab] = useState<'sea' | 'air'>('sea');
     const [hasSearched, setHasSearched] = useState(false);
     const [searchResults, setSearchResults] = useState<Order[]>([]);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
     // Column configurations
     const columnConfigs = [
-        { key: 'orderId', label: 'Mã Đơn Hàng' },
         { key: 'createdAt', label: 'Ngày Xuất' },
+        { key: 'orderId', label: 'Mã Đơn Hàng' },
         { key: 'senderName', label: 'Người Gửi' },
+        { key: 'senderPhone', label: 'SĐT Người Gửi' },
+        { key: 'senderAddress', label: 'Địa Chỉ Người Gửi' },
         { key: 'receiverName', label: 'Người Nhận' },
+        { key: 'receiverPhone', label: 'SĐT Người Nhận' },
         { key: 'receiverRegion', label: 'Khu Vực' },
+        { key: 'receiverAddress', label: 'Địa Chỉ Người Nhận' },
+        { key: 'totalPackages', label: 'Số Kiện' },
+        { key: 'weight', label: 'Trọng Lượng' },
+        { key: 'price', label: 'Giá' },
         { key: 'totalAmount', label: 'Thành Tiền' },
-        { key: 'status', label: 'Trạng Thái' },
+        { key: 'paymentStatus', label: 'Trạng Thái Thanh Toán' },
         { key: 'note', label: 'Ghi Chú' },
     ];
 
     const defaultVisibleColumns = {
-        orderId: true,
         createdAt: true,
+        orderId: true,
         senderName: true,
+        senderPhone: true,
+        senderAddress: true,
         receiverName: true,
+        receiverPhone: true,
         receiverRegion: true,
+        receiverAddress: true,
+        totalPackages: true,
+        weight: true,
+        price: true,
         totalAmount: true,
-        status: true,
-        note: false,
+        paymentStatus: true,
+        note: true,
     };
 
     const {
@@ -55,37 +80,68 @@ export default function SearchPage() {
     const onFinish = (values: any) => {
         let filtered = [...OrderMockData];
         
-        // Lọc theo ngày tạo đơn
-        if (values.createdAt) {
+        // Lọc theo ngày gửi
+        if (values.createdAt && values.createdAt.length === 2) {
             const [startDate, endDate] = values.createdAt;
-            filtered = filterByDateRange(filtered, startDate.toDate(), endDate.toDate(), 'createdAt');
+            filtered = filterByDateRange(
+                filtered, 
+                startDate.toDate(), 
+                endDate.toDate(), 
+                'createdAt'  // hoặc 'createdAt' tùy theo trường ngày trong data
+            );
         }
 
-        // Lọc theo người gửi
-        if (values.sender) {
-            filtered = filterBySender(filtered, values.sender);
+        // Lọc theo dịch vụ vận chuyển (air/sea)
+        if (values.shippingService) {
+            filtered = filterByServiceType(filtered, values.shippingService);
         }
 
-        // Lọc theo người nhận
-        if (values.receiver) {
-            filtered = filterByReceiver(filtered, values.receiver);
+        // Lọc theo hình thức vận chuyển (import/export)
+        if (values.shippingMethod) {
+            filtered = filterByOrderType(filtered, values.shippingMethod);
         }
 
         // Lọc theo khu vực
-        if (values.region) {
-            filtered = filterByRegion(filtered, values.region);
+        if (values.receiverRegion) {
+            filtered = filterByRegion(filtered, values.receiverRegion);
         }
 
+        // Lọc theo trạng thái vận chuyển
+        if (values.shippingStatus) {
+            filtered = filtered.filter(order => order.status === values.shippingStatus);
+        }
+
+        // Lọc theo trạng thái thanh toán
         if (values.paymentStatus) {
             filtered = filterByPaymentStatus(filtered, values.paymentStatus);
         }
 
-        // Thêm lọc theo loại đơn hàng
-        if (values.orderType) {
-            filtered = filterByOrderType(filtered, values.orderType);
+        // Lọc theo thông tin người gửi (bao gồm mã, tên, số điện thoại)
+        if (values.customerCode || values.sender || values.senderPhone) {
+            if (values.customerCode) {
+                filtered = filterBySender(filtered, values.customerCode);
+            }
+            if (values.sender) {
+                filtered = filterBySender(filtered, values.sender);
+            }
+            if (values.senderPhone) {
+                filtered = filterBySender(filtered, values.senderPhone);
+            }
         }
 
-        // Cập nhật kết quả tìm kiếm
+        // Lọc theo thông tin người nhận (bao gồm mã, tên, số điện thoại)
+        if (values.receiverCode || values.receiver || values.receiverPhone) {
+            if (values.receiverCode) {
+                filtered = filterByReceiver(filtered, values.receiverCode);
+            }
+            if (values.receiver) {
+                filtered = filterByReceiver(filtered, values.receiver);
+            }
+            if (values.receiverPhone) {
+                filtered = filterByReceiver(filtered, values.receiverPhone);
+            }
+        }
+
         setSearchResults(filtered);
         setHasSearched(true);
     };
@@ -104,129 +160,84 @@ export default function SearchPage() {
         setIsExportModalOpen(false);
     };
 
-    const renderSearchForm = () => (
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
-                <Form.Item label="Ngày tạo đơn" name="createdAt">
-                    <RangePicker style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item label="Người gửi" name="sender">
-                    <Input placeholder="Nhập tên người gửi" />
-                </Form.Item>
-                <Form.Item label="Người nhận" name="receiver">
-                    <Input placeholder="Nhập tên người nhận" />
-                </Form.Item>
-                <Form.Item label="Khu vực" name="region">
-                    <Select placeholder="Chọn khu vực">
-                        {Object.entries(REGION).map(([key, value]) => (
-                            <Select.Option key={key} value={key}>
-                                {value}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-                <Form.Item label="Tình trạng thanh toán" name="paymentStatus">
-                    <Select placeholder="Chọn tình trạng">
-                        <Select.Option value="paid">Đã thanh toán</Select.Option>
-                        <Select.Option value="unpaid">Chưa thanh toán</Select.Option>
-                    </Select>
-                </Form.Item>
-                <Form.Item label="Loại đơn hàng" name="orderType">
-                    <Select placeholder="Chọn loại đơn hàng">
-                        <Select.Option value={ORDER_TYPE.EXPORT}>Xuất khẩu</Select.Option>
-                        <Select.Option value={ORDER_TYPE.IMPORT}>Nhập khẩu</Select.Option>
-                    </Select>
-                </Form.Item>
-            </div>
-
-            <Form.Item style={{ marginTop: '24px', textAlign: 'right' }}>
-                <Space>
-                    <Button onClick={onReset}>Làm mới</Button>
-                    <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                        Tìm kiếm
-                    </Button>
-                    {hasSearched && searchResults.length > 0 && (
-                        <Button
-                            icon={<DownloadOutlined />}
-                            onClick={() => setIsExportModalOpen(true)}
-                            className="bg-green-500 hover:bg-green-600 text-white border-none"
-                        >
-                            Xuất Excel
-                        </Button>
-                    )}
-                </Space>
-            </Form.Item>
-        </Form>
-    );
-
-    const renderSearchContent = (
-        title: string,
-        description: string
-    ) => (
-        <>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-                <p className="text-gray-500 mt-1">{description}</p>
-            </div>
-
-            <Card title="Tham số tra cứu" className="mb-4">
-                {renderSearchForm()}
-            </Card>
-
-            {hasSearched && (
-                <>
-                    <Card title="Tùy chỉnh hiển thị" className="mb-4">
-                        <ColumnVisibilityControl
-                            columns={columnConfigs}
-                            visibleColumns={visibleColumns}
-                            onChange={handleColumnVisibilityChange}
-                        />
-                    </Card>
-
-                    {searchResults.length > 0 ? (
-                        <Table
-                            columns={filteredColumns as (ColumnGroupType<Order> | ColumnType<Order>)[]}
-                            dataSource={searchResults}
-                            rowKey="orderId"
-                            scroll={{ x: 'max-content' }}
-                            bordered
-                            size="middle"
-                            pagination={{
-                                pageSize: 10,
-                                showSizeChanger: true,
-                                showTotal: (total) => `Tổng số ${total} đơn hàng`,
-                            }}
-                            rowClassName={(record, index) => 
-                                index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                            }
-                        />
-                    ) : (
-                        <div className="text-center p-10 bg-gray-50 rounded-lg">
-                            <p className="text-gray-500">Không tìm thấy đơn hàng nào phù hợp</p>
-                        </div>
-                    )}
-                </>
-            )}
-        </>
-    );
-
     return (
         <MainLayout>
             <Card className="shadow-lg rounded-lg">
-                <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'sea' | 'air')}>
-                    <Tabs.TabPane tab="Tra cứu đường biển" key="sea">
-                        {renderSearchContent(
-                            "Tra cứu đơn hàng đường biển",
-                            "Tìm kiếm đơn hàng vận chuyển đường biển"
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">Tra cứu đơn hàng</h1>
+                    <p className="text-gray-500 mt-1">Tìm kiếm thông tin đơn hàng</p>
+                </div>
+
+                <div className="mb-4 flex w-full justify-end">
+                    <Button 
+                        type="primary" 
+                        icon={<SearchOutlined />}
+                        onClick={() => setIsSearchModalOpen(true)}
+                    >
+                        Tìm kiếm
+                    </Button>
+                </div>
+
+                {hasSearched && (
+                    <>
+                        <Card title="Tùy chỉnh hiển thị" className="mb-4">
+                            <ColumnVisibilityControl
+                                columns={columnConfigs}
+                                visibleColumns={visibleColumns}
+                                onChange={handleColumnVisibilityChange}
+                            />
+                        </Card>
+
+                        {searchResults.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <Table
+                                    columns={filteredColumns as (ColumnGroupType<Order> | ColumnType<Order>)[]}
+                                    dataSource={searchResults}
+                                    rowKey="orderId"
+                                    scroll={{ 
+                                        x: 2500, // Tổng chiều rộng tối thiểu của bảng
+                                        y: 500   // Chiều cao cố định của bảng
+                                    }}
+                                    bordered
+                                    size="middle"
+                                    pagination={{
+                                        pageSize: 10,
+                                        showSizeChanger: true,
+                                        showTotal: (total) => `Tổng số ${total} đơn hàng`,
+                                        position: ['bottomCenter'],
+                                        style: { marginTop: 16 }
+                                    }}
+                                    rowClassName={(record, index) => 
+                                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                                    }
+                                    sticky={{
+                                        offsetHeader: 0,
+                                        offsetScroll: 0,
+                                        getContainer: () => window
+                                    }}
+                                    style={{ 
+                                        maxWidth: '100%',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <div className="text-center p-10 bg-gray-50 rounded-lg">
+                                <p className="text-gray-500">Không tìm thấy đơn hàng nào phù hợp</p>
+                            </div>
                         )}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab="Tra cứu đường bay" key="air">
-                        {renderSearchContent(
-                            "Tra cứu đơn hàng đường bay",
-                            "Tìm kiếm đơn hàng vận chuyển đường bay"
-                        )}
-                    </Tabs.TabPane>
-                </Tabs>
+                    </>
+                )}
+
+                <SearchModal
+                    open={isSearchModalOpen}
+                    onCancel={() => setIsSearchModalOpen(false)}
+                    onSearch={(values) => {
+                        onFinish(values);
+                        setIsSearchModalOpen(false);
+                    }}
+                    onReset={onReset}
+                />
 
                 <ExportModal
                     open={isExportModalOpen}

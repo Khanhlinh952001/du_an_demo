@@ -4,14 +4,14 @@ import type { Recipient } from '@/types/Recipient';
 import Search from "antd/es/transfer/search";
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
-import { columns } from '@/app/pages/recipients/columns';
+import { columns } from './columns';
 import { useEffect, useState } from 'react';
 import { recipientsBySender, recipientMockData } from '@/mocks/recipientMockData';
 import AddRecipientModal from '@/components/modals/AddRecipientModal';
 import ExportModal from '@/components/common/ExportModal';
 import { recipientExportConfig, createExportData } from '@/configs/exportConfig';
 import * as XLSX from 'xlsx';
-
+import { getRecipientsBySenderId } from '@/mocks/recipientMockData';
 interface RecipientListProps {
   senderId?: string;
 }
@@ -23,9 +23,9 @@ const RecipientList = ({ senderId }: RecipientListProps) => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [editingRecipient, setEditingRecipient] = useState<Recipient>();
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-
+  const [show ,setShow] = useState<boolean>(false);
   useEffect(() => {
-    const data = senderId ? recipientsBySender[senderId] || [] : recipientMockData;
+    const data = senderId ? getRecipientsBySenderId(senderId) : recipientMockData;
     setRecipients(data);
   }, [senderId]);
 
@@ -81,6 +81,7 @@ const RecipientList = ({ senderId }: RecipientListProps) => {
     { key: 'contact', label: 'Thông tin liên hệ' },
     { key: 'region', label: 'Khu vực' },
     { key: 'shipper', label: 'Đơn vị vận chuyển' },
+    { key: 'note', label: 'Ghi chú' },
     { key: 'status', label: 'Trạng thái' },
     { key: 'management', label: 'Quản lý' },
   ];
@@ -91,6 +92,7 @@ const RecipientList = ({ senderId }: RecipientListProps) => {
     contact: true,
     region: true,
     shipper: true,
+    note: true,
     status: true,
     management: true,
   };
@@ -127,7 +129,8 @@ const RecipientList = ({ senderId }: RecipientListProps) => {
 
   const filteredRecipients = recipients.filter(recipient => 
     recipient.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    recipient.recipientId.toLowerCase().includes(searchText.toLowerCase())
+    recipient.recipientId.toLowerCase().includes(searchText.toLowerCase()) ||
+    recipient.phone.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -168,17 +171,16 @@ const RecipientList = ({ senderId }: RecipientListProps) => {
               Thêm người nhận
             </Button>
           )}
-        </Space>
-      </div>
-
-      <div className="mb-4 bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-sm font-medium text-gray-600 mb-2">Tùy chỉnh hiển thị</h3>
-        <ColumnVisibilityControl
+           <ColumnVisibilityControl
           columns={columnConfigs}
           visibleColumns={visibleColumns}
           onChange={handleColumnVisibilityChange}
         />
+        </Space>
       </div>
+
+        {/* <h3 className="text-sm font-medium text-gray-600 mb-2">Tùy chỉnh hiển thị</h3> */}
+       
 
       <Table 
         columns={columnsWithActions}

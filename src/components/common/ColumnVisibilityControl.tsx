@@ -1,5 +1,6 @@
-import { Checkbox } from 'antd';
-import { ReactNode } from 'react';
+import { Button, Checkbox, Modal } from 'antd';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { ReactNode, useState } from 'react';
 
 export interface ColumnConfig {
   key: string;
@@ -21,20 +22,40 @@ export default function ColumnVisibilityControl({
   title = 'Hiển thị cột:',
   className = ''
 }: ColumnVisibilityControlProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
   return (
-    <div className={`p-4 bg-white rounded-lg shadow-sm ${className}`}>
-      <div className="font-medium mb-2">{title}</div>
-      <div className="flex flex-wrap gap-4">
-        {columns.map(column => (
-          <Checkbox
-            key={column.key}
-            checked={visibleColumns[column.key]}
-            onChange={() => onChange(column.key)}
-          >
-            {column.label}
-          </Checkbox>
-        ))}
+    <div className={className}>
+      <div className='flex justify-end'>
+
+      <Button 
+        onClick={() => setIsVisible(true)}
+        className="hover:bg-gray-100 transition-colors"
+        type="default"
+        icon={<EyeOutlined />}
+      />
       </div>
+
+      <Modal
+        title={title}
+        open={isVisible}
+        onCancel={() => setIsVisible(false)}
+        footer={null}
+        width={400}
+      >
+        <div className="flex flex-wrap gap-4">
+          {columns.map(column => (
+            <Checkbox
+              key={column.key}
+              checked={visibleColumns[column.key]}
+              onChange={() => onChange(column.key)}
+              className="hover:text-blue-600 transition-colors"
+            >
+              {column.label}
+            </Checkbox>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 } 

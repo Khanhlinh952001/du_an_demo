@@ -19,6 +19,8 @@ import ExportModal from '@/components/common/ExportModal';
 import { OrderMockData } from '@/mocks/OrderMock';
 const { Search } = Input;
 import { filterUnpaidOrPartialPaidOrders } from '@/utils/filters';
+import QuotationPDF from '@/components/QuotationPDF';
+
 export default function DebtPage() {
   const [searchText, setSearchText] = useState('');
   const [selectedRows, setSelectedRows] = useState<Order[]>([]);
@@ -73,8 +75,7 @@ export default function DebtPage() {
       title: 'Tạo báo giá hàng loạt',
       content: `Tạo báo giá cho ${selectedRows.length} đơn hàng đã chọn?`,
       onOk: () => {
-        // Xử lý tạo báo giá hàng loạt
-        console.log('Tạo báo giá cho các đơn:', selectedRows);
+        return <QuotationPDF orders={selectedRows} />;
       },
     });
   };
@@ -101,7 +102,7 @@ export default function DebtPage() {
               allowClear
             />
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <Button
               type="primary"
               icon={<DownloadOutlined />}
@@ -118,7 +119,7 @@ export default function DebtPage() {
             </Button>
           </div>
         </div>
-        <div className="mb-4">
+        <div className="my-4">
           <Space>
             <Button 
               type="primary"

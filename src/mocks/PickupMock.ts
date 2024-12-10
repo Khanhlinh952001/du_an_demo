@@ -14,7 +14,7 @@ export const mockPickups: PickupInfo[] = [
         pickupPhone: "0934567890",
         pickupDate: formatDate(new Date()),
         preferredTimeSlot: "13:00-16:00",
-        status: "cancelled",
+        status: "pending",
         statusHistory: [
             {
                 status: "pending",

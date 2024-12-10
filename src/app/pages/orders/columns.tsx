@@ -1,7 +1,7 @@
 import { ColumnsType } from "antd/es/table";
 import { Order } from "@/types/Order";
 import { Tag, Tooltip } from "antd";
-import type { ExtendedColumnType } from "../recipients/columns";
+import type { ExtendedColumnType } from "../../../components/recipients/columns";
 import { CalendarOutlined, IdcardOutlined, PhoneOutlined, HomeOutlined, UserOutlined, EnvironmentOutlined, InboxOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { formatDate } from "@/utils/format";
 import { PAYMENT_STATUS, PaymentStatusType } from '@/constants/payments';

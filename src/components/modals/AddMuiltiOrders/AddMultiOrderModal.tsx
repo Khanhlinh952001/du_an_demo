@@ -150,7 +150,7 @@ const AddMultiOrderModal: React.FC<AddMultiOrderModalProps> = ({
           onClick={handleSubmit}
           className="bg-blue-500"
         >
-          Tạo đơn
+          Tạo đơn hàng loạt
         </Button>
       ]}
     >
@@ -206,16 +206,7 @@ const AddMultiOrderModal: React.FC<AddMultiOrderModalProps> = ({
               className="bg-white rounded-lg shadow-md"
             />
           </div>
-          <div className='w-full flex justify-end pr-8 pt-4'>
-          <Button 
-              type="primary"
-              icon={<PrinterOutlined />}
-              onClick={handlePrint}
-              className="ml-2 bg-blue-500 border-blue-500"
-            >
-              In Bill
-            </Button>
-          </div>
+          
                  
         </div>
       </Form>

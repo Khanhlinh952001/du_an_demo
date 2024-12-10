@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Select, InputNumber, DatePicker, Space, Checkbox, Button, List, Typography, Tabs, Card } from 'antd';
-import { UserOutlined, PhoneOutlined, HomeOutlined, ShoppingOutlined, DollarOutlined, PrinterOutlined, SearchOutlined, FacebookOutlined, MessageOutlined, WechatOutlined, GlobalOutlined, BoxPlotOutlined, SaveOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Select, InputNumber, DatePicker, Space, Checkbox, Button, List, Typography, Tabs, Card, Row, Col } from 'antd';
+import { UserOutlined, PhoneOutlined, HomeOutlined, ShoppingOutlined, DollarOutlined, PrinterOutlined, SearchOutlined, FacebookOutlined, MessageOutlined, WechatOutlined, GlobalOutlined, BoxPlotOutlined, SaveOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
 import type { Order } from '@/types/Order';
 import dayjs from 'dayjs';
 import { SiFacebook, SiKakaotalk, SiZalo } from 'react-icons/si';
@@ -304,308 +304,482 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
 
   return (
     <Modal
-      title={mode === 'add' ? "Tạo v���n đơn mới > Tao mộ đơn" : "Chỉnh sửa vận đơn"}
+      title={
+        <div className="flex items-center gap-2 text-lg">
+          {mode === 'add' ? (
+            <>
+              <BoxPlotOutlined className="text-blue-500" />
+              <span>Tạo vận đơn mới</span>
+            </>
+          ) : (
+            <>
+              <EditOutlined className="text-orange-500" />
+              <span>Chỉnh sửa vận đơn</span>
+            </>
+          )}
+        </div>
+      }
       open={open}
       onCancel={() => {
         form.resetFields();
         onCancel();
       }}
-      onOk={handleSubmit}
-      okText="Lưu"
-      cancelText="Hủy"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button 
+            icon={<CloseOutlined />} 
+            onClick={onCancel}
+          >
+            Hủy
+          </Button>
+          <Button 
+            type="primary" 
+            icon={<SaveOutlined />} 
+            onClick={handleSubmit}
+          >
+            {mode === 'add' ? 'Tạo vận đơn' : 'Lưu thay đổi'}
+          </Button>
+        </div>
+      }
       width={1200}
+      className="custom-modal"
     >
-      <Form form={form} layout="vertical" initialValues={initialData}>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          {/* Left Column */}
-          <div style={{ flex: 1 }}>
-            {/* Sender Info */}
-            <Card className="">
-              <h3 className='flex items-center gap-2 mb-4'>
-                <span>Người gửi:</span>
-                <Input 
-                  prefix={<UserOutlined className="text-gray-400" />} 
-                  disabled 
-                  value={form.getFieldValue('senderId') ? `#${form.getFieldValue('senderId')}` : ''} 
-                  className="w-32 ml-2"
-                  style={{ 
-                    backgroundColor: '#f5f5f5',
-                    border: '1px solid #d9d9d9',
-                    borderRadius: '6px',
-                    padding: '4px 11px',
-                    fontSize: '14px'
-                  }}
-                />
-              </h3>
+      <Form 
+        form={form} 
+        layout="vertical" 
+        initialValues={initialData}
+        className="px-4 py-2"
+      >
+        {/* Main Content */}
+        <div className="flex gap-4">
+          {/* Left Column - Customer Information */}
+          <div className={`${searchResults.length > 0 || recipientResults.length > 0 ? 'w-2/3' : 'w-full'} space-y-4`}>
+            {/* Sender & Receiver Cards */}
+            <Row gutter={16}>
+              <Col span={12}>
+                <Card 
+                  title={
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <UserOutlined />
+                      <span>Thông tin người gửi</span>
+                    </div>
+                  }
+                  className="h-full shadow-sm hover:shadow-md transition-shadow"
+                  bordered={false}
+                >
+                  <h3 className='flex items-center gap-2 mb-4'>
+                    <span>Người gửi:</span>
+                    <Input 
+                      prefix={<UserOutlined className="text-gray-400" />} 
+                      disabled 
+                      value={form.getFieldValue('senderId') ? `#${form.getFieldValue('senderId')}` : ''} 
+                      className="w-32 ml-2"
+                      style={{ 
+                        backgroundColor: '#f5f5f5',
+                        border: '1px solid #d9d9d9',
+                        borderRadius: '6px',
+                        padding: '4px 11px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </h3>
 
-              <Space.Compact block>
-                <Form.Item name="senderSearch" style={{ flex: 1, marginBottom: 8 }}>
-                  <Input
-                    placeholder="Tìm người gửi..."
-                    onChange={(e) => handleNameSearch(e.target.value)}
-                    allowClear
-                    prefix={<SearchOutlined />}
-                  />
-                </Form.Item>
-              </Space.Compact>
-             
-              <Space style={{ width: '100%' }} direction="vertical" size="small">
-                <Input.Group compact>
-                  <Form.Item name="senderName" style={{ width: '50%' }}>
-                    <Input prefix={<UserOutlined />} placeholder="Tên người gửi" />
-                  </Form.Item>
+                  <Space.Compact block>
+                    <Form.Item name="senderSearch" style={{ flex: 1, marginBottom: 8 }}>
+                      <Input
+                        placeholder="Tìm người gửi..."
+                        onChange={(e) => handleNameSearch(e.target.value)}
+                        allowClear
+                        prefix={<SearchOutlined />}
+                      />
+                    </Form.Item>
+                  </Space.Compact>
                  
-                  <Form.Item name="senderPhone" style={{ width: '50%' }}>
-                    <Input prefix={<PhoneOutlined />} placeholder="SĐT" />
-                  </Form.Item>
-                </Input.Group>
-                
-                <Form.Item name="senderAddress">
-                  <Input prefix={<HomeOutlined />} placeholder="Địa chỉ" />
-                </Form.Item>
-             
-                <Space>
-                  <Form.Item name="facebook" style={{ marginBottom: 0 }}>
-                    <Input prefix={<FacebookOutlined />} placeholder="Facebook" style={{ width: 150 }} />
-                  </Form.Item>
-                  <Form.Item name="zalo" style={{ marginBottom: 0 }}>
-                    <Input prefix={<SiZalo />} placeholder="Zalo" style={{ width: 150 }} />
-                  </Form.Item>
-                </Space>
-
-                <Form.Item name="contactChannels">
-                  <Card>
-                    <h4>Kênh liên hệ</h4>
+                  <Space style={{ width: '100%' }} direction="vertical" size="small">
+                    <Input.Group compact>
+                      <Form.Item name="senderName" style={{ width: '50%' }}>
+                        <Input prefix={<UserOutlined />} placeholder="Tên người gửi" />
+                      </Form.Item>
+                     
+                      <Form.Item name="senderPhone" style={{ width: '50%' }}>
+                        <Input prefix={<PhoneOutlined />} placeholder="SĐT" />
+                      </Form.Item>
+                    </Input.Group>
+                    
+                    <Form.Item name="senderAddress">
+                      <Input prefix={<HomeOutlined />} placeholder="Địa chỉ" />
+                    </Form.Item>
+                    <Form.Item name="contactChannels">
+                        <h4>Liên hệ</h4>
+                        <Space>
+                          <Checkbox 
+                            checked={form.getFieldValue('contactChannels')?.includes('Facebook')}
+                          >
+                            Facebook
+                          </Checkbox>
+                          <Checkbox 
+                            checked={form.getFieldValue('contactChannels')?.includes('Zalo')}
+                          >
+                           Zalo
+                          </Checkbox>
+                          <Checkbox 
+                            checked={form.getFieldValue('contactChannels')?.includes('KakaoTalk')}
+                          >
+                          Kakaotalk
+                          </Checkbox>
+                        </Space>
+                    </Form.Item>
                     <Space>
-                      <Checkbox 
-                        checked={form.getFieldValue('contactChannels')?.includes('Facebook')}
-                      >
-                        Facebook
-                      </Checkbox>
-                      <Checkbox 
-                        checked={form.getFieldValue('contactChannels')?.includes('Zalo')}
-                      >
-                       Zalo
-                      </Checkbox>
-                      <Checkbox 
-                        checked={form.getFieldValue('contactChannels')?.includes('KakaoTalk')}
-                      >
-                      Kakaotalk
-                      </Checkbox>
+                      <Form.Item name="facebook" style={{ marginBottom: 0 }}>
+                        <Input prefix={<FacebookOutlined />} placeholder="Facebook" style={{ width: 150 }} />
+                      </Form.Item>
+                      <Form.Item name="zalo" style={{ marginBottom: 0 }}>
+                        <Input prefix={<SiZalo />} placeholder="Zalo" style={{ width: 150 }} />
+                      </Form.Item>
                     </Space>
-                  </Card>
-                </Form.Item>
-              </Space>
-            </Card>
 
-            {/* Package Info - Simplified */}
-            <Card className="mt-4">
-              <h3>Thông tin hàng</h3>
-              <Space direction="vertical" style={{ width: '100%' }} size="small">
-                <Input.Group compact>
-                  <Form.Item name="packageType" style={{ width: '50%' }}>
-                    <Select placeholder="Loại hàng">
-                      {Object.entries(ITEM_TYPES).map(([key, value]) => (
-                        <Select.Option key={value} value={value}>
-                          {key}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  <Form.Item name="totalPackages" style={{ width: '50%' }}>
-                    <InputNumber style={{ width: '100%' }} placeholder="Số kiện" />
-                  </Form.Item>
-                </Input.Group>
-
-                <Input.Group compact>
-                  <Form.Item name="weight" style={{ width: '50%' }}>
-                    <InputNumber style={{ width: '100%' }} placeholder="Cân nặng (kg)" />
-                  </Form.Item>
-                  <Form.Item name="price" style={{ width: '50%' }}>
-                    <InputNumber style={{ width: '100%' }} placeholder="Đơn giá (won)" />
-                  </Form.Item>
-                </Input.Group>
-              </Space>
-            </Card>
-          </div>
-
-          {/* Right Column */}
-          <div style={{ flex: 1 }}>
-            {/* Receiver Info */}
-            <Card className="">
-              <h3 className='flex items-center gap-2 mb-4'>
-                <span>Người nhận:</span>
-                <Input 
-                  prefix={<UserOutlined className="text-gray-400" />} 
-                  disabled 
-                  value={form.getFieldValue('receiverId') ? `#${form.getFieldValue('receiverId')}` : ''} 
-                  className="w-32 ml-2"
-                  style={{ 
-                    backgroundColor: '#f5f5f5',
-                    border: '1px solid #d9d9d9',
-                    borderRadius: '6px',
-                    padding: '4px 11px',
-                    fontSize: '14px'
-                  }}
-                />
-              </h3>
-              <Space.Compact block>
-                <Form.Item name="receiverSearch" style={{ flex: 1, marginBottom: 8 }}>
-                  <Input
-                    placeholder="Tìm người nhận..."
-                    onChange={(e) => handleRecipientSearch(e.target.value)}
-                    allowClear
-                    prefix={<SearchOutlined />}
-                  />
-                </Form.Item>
-              </Space.Compact>
-
-              <Space style={{ width: '100%' }} direction="vertical" size="small">
-                <Input.Group compact>
-                  <Form.Item name="receiverName" style={{ width: '50%' }}>
-                    <Input prefix={<UserOutlined />} placeholder="Tên người nhận" />
-                  </Form.Item>
-               
-                  <Form.Item name="receiverPhone" style={{ width: '50%' }}>
-                    <Input prefix={<PhoneOutlined />} placeholder="SĐT" />
-                  </Form.Item>
-                </Input.Group>
-
-                <Form.Item name="receiverAddress">
-                  <Input prefix={<HomeOutlined />} placeholder="Địa chỉ nhận" />
-                </Form.Item>
                 
-                <Form.Item name="receiverRegion">
-                  <Input prefix={<GlobalOutlined />} placeholder="Khu vực" />
-                </Form.Item>
-              </Space>
-            </Card>
+                  </Space>
+                </Card>
+              </Col>
+              
+              <Col span={12}>
+                <Card 
+                  title={
+                    <div className="flex items-center gap-2 text-green-600">
+                      <UserOutlined />
+                      <span>Thông tin người nhận</span>
+                    </div>
+                  }
+                  className="h-full shadow-sm hover:shadow-md transition-shadow"
+                  bordered={false}
+                >
+                  <h3 className='flex items-center gap-2 mb-4'>
+                    <span>Người nhận:</span>
+                    <Input 
+                      prefix={<UserOutlined className="text-gray-400" />} 
+                      disabled 
+                      value={form.getFieldValue('receiverId') ? `#${form.getFieldValue('receiverId')}` : ''} 
+                      className="w-32 ml-2"
+                      style={{ 
+                        backgroundColor: '#f5f5f5',
+                        border: '1px solid #d9d9d9',
+                        borderRadius: '6px',
+                        padding: '4px 11px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </h3>
+                  <Space.Compact block>
+                    <Form.Item name="receiverSearch" style={{ flex: 1, marginBottom: 8 }}>
+                      <Input
+                        placeholder="Tìm người nhận..."
+                        onChange={(e) => handleRecipientSearch(e.target.value)}
+                        allowClear
+                        prefix={<SearchOutlined />}
+                      />
+                    </Form.Item>
+                  </Space.Compact>
 
-            {/* Shipping Info - Simplified */}
-            <Card className=" mt-4">
-              <h3>Vận chuyển</h3>
-              <Space direction="vertical" style={{ width: '100%' }} size="small">
-                <Input.Group compact>
-                  <Form.Item name="serviceType" style={{ width: '50%' }}>
-                    <Select placeholder="Loại dịch vụ">
-                      {Object.entries(ORDER_TYPE).map(([key, value]) => (
-                        <Select.Option key={value} value={value}>
-                          {key === 'EXPORT' ? 'Xuất khẩu' : 'Nhập khẩu'}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  <Form.Item name="shippingMethod" style={{ width: '50%' }}>
-                    <Select placeholder="Phương thức">
-                      {Object.entries(SHIPPING_METHOD).map(([key, value]) => (
-                        <Select.Option key={value} value={value}>
-                          {key === 'AIR' ? 'Đường bay' : 'Đường biển'}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Input.Group>
+                  <Space style={{ width: '100%' }} direction="vertical" size="small">
+                    <Input.Group compact>
+                      <Form.Item name="receiverName" style={{ width: '50%' }}>
+                        <Input prefix={<UserOutlined />} placeholder="Tên người nhận" />
+                      </Form.Item>
+                   
+                      <Form.Item name="receiverPhone" style={{ width: '50%' }}>
+                        <Input prefix={<PhoneOutlined />} placeholder="SĐT" />
+                      </Form.Item>
+                    </Input.Group>
 
-                <Form.Item name="note">
-                  <Input.TextArea placeholder="Ghi chú" rows={3} />
-                </Form.Item>
-              </Space>
-            </Card>
+                    <Form.Item name="receiverAddress">
+                      <Input prefix={<HomeOutlined />} placeholder="Địa chỉ nhận" />
+                    </Form.Item>
+                    
+                    <Form.Item name="receiverRegion">
+                      <Input prefix={<GlobalOutlined />} placeholder="Khu vực" />
+                    </Form.Item>
+                  </Space>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Shipping & Package Information */}
+            <Row gutter={16}>
+              <Col span={12}>
+                <Card 
+                  title={
+                    <div className="flex items-center gap-2 text-purple-600">
+                      <BoxPlotOutlined />
+                      <span>Thông tin vận chuyển</span>
+                    </div>
+                  }
+                  className="h-full shadow-sm hover:shadow-md transition-shadow"
+                  bordered={false}
+                >
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Form.Item 
+                        name="serviceType" 
+                        label="Hình thức vận chuyển"
+                        rules={[{ required: true, message: 'Vui lòng chọn hình thức vận chuyển' }]}
+                      >
+                        <Select placeholder="Chọn hình thức">
+                          <Select.Option value={ORDER_TYPE.EXPORT}>Xuất khẩu</Select.Option>
+                          <Select.Option value={ORDER_TYPE.IMPORT}>Nhập khẩu</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    
+                    <Col span={12}>
+                      <Form.Item 
+                        name="shippingMethod" 
+                        label="Phương thức vận chuyển"
+                        rules={[{ required: true, message: 'Vui lòng chọn phương thức vận chuyển' }]}
+                      >
+                        <Select placeholder="Chọn phương thức">
+                          <Select.Option value={SHIPPING_METHOD.AIR}>Đường bay</Select.Option>
+                          <Select.Option value={SHIPPING_METHOD.SEA}>Đường biển</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={12}>
+                      <Form.Item 
+                        name="price" 
+                        label="Đơn giá"
+                        rules={[
+                          { required: true, message: 'Vui lòng nhập đơn giá' },
+                          { type: 'number', min: 0, message: 'Đơn giá phải lớn hơn 0' }
+                        ]}
+                      >
+                        <InputNumber
+                          style={{ width: '100%' }}
+                          placeholder="Nhập đơn giá (won)"
+                          formatter={value => `₩ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          parser={value => value!.replace(/\₩\s?|(,*)/g, '')}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    
+                  </Row>
+                </Card>
+              </Col>
+              
+              <Col span={12}>
+                <Card 
+                  title={
+                    <div className="flex items-center gap-2 text-orange-600">
+                      <ShoppingOutlined />
+                      <span>Thông tin hàng hóa</span>
+                    </div>
+                  }
+                  className="h-full shadow-sm hover:shadow-md transition-shadow"
+                  bordered={false}
+                >
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Form.Item 
+                        name="packageType" 
+                        label="Loại hàng"
+                        rules={[{ required: true, message: 'Vui lòng chọn loại hàng' }]}
+                      >
+                        <Select placeholder="Chọn loại hàng">
+                          {Object.entries(ITEM_TYPES).map(([key, value]) => (
+                            <Select.Option key={value} value={value}>
+                              {key}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={12}>
+                      <Form.Item 
+                        name="weight" 
+                        label="Cân nặng (kg)"
+                        rules={[
+                          { required: true, message: 'Vui lòng nhập cân nặng' },
+                          { type: 'number', min: 0.1, message: 'Cân nặng phải lớn hơn 0' }
+                        ]}
+                      >
+                        <InputNumber
+                          style={{ width: '100%' }}
+                          placeholder="Nhập cân nặng"
+                          step={0.1}
+                          precision={1}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={12}>
+                      <Form.Item 
+                        name="totalPackages" 
+                        label="Số kiện"
+                        rules={[
+                          { required: true, message: 'Vui lòng nhập số kiện' },
+                          { type: 'number', min: 1, message: 'Số kiện phải lớn hơn 0' }
+                        ]}
+                      >
+                        <InputNumber
+                          style={{ width: '100%' }}
+                          placeholder="Nhập số kiện"
+                          min={1}
+                          precision={0}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={24}>
+                      <Form.Item 
+                        name="note" 
+                        label="Ghi chú"
+                      >
+                        <Input.TextArea 
+                          placeholder="Nhập ghi chú về hàng hóa (nếu có)"
+                          rows={3}
+                          maxLength={500}
+                          showCount
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+              </Col>
+            </Row>
           </div>
 
-          {/* Search Results Sidebar - Keep existing code */}
-          {(searchResults.length > 0 || recipientResults.length > 0) && (
-            <div style={{ width: '250px', border: '1px solid #d9d9d9', padding: '16px', borderRadius: '8px' }}>
-              <Tabs defaultActiveKey="senders">
-                {searchResults.length > 0 && (
-                  <Tabs.TabPane tab="Người gửi" key="senders">
-                    <List
-                      size="small"
-                      dataSource={searchResults}
-                      renderItem={(item) => (
-                        <List.Item
-                          className="hover:bg-blue-50 cursor-pointer"
-                          onClick={() => handleCustomerSelect(item.senderId)}
-                        >
-                          <List.Item.Meta
-                            title={item.name}
-                            description={
-                              <Space direction="vertical" size="small">
-                                <Typography.Text type="secondary">
-                                  <PhoneOutlined /> {item.phone}
-                                </Typography.Text>
-                                <Typography.Text type="secondary" ellipsis>
-                                  <HomeOutlined /> {item.address}
-                                </Typography.Text>
-                                <Space>
-                                  {item.facebook && (
-                                    <SiFacebook className="text-blue-600" />
-                                  )}
-                                  {item.zalo && (
-                                    <SiZalo className="text-blue-500" />
-                                  )}
-                                  {item.kakaoTalk && (
-                                    <SiKakaotalk className="text-yellow-500" />
-                                  )}
+          {/* Right Column - Search Results */}
+          <div className={`${searchResults.length > 0 || recipientResults.length > 0 ? 'block w-1/3' : 'hidden '}`}>
+            {(searchResults.length > 0 || recipientResults.length > 0) && (
+              <Card 
+                title={
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <SearchOutlined />
+                    <span>Kết quả tìm kiếm</span>
+                  </div>
+                }
+                className="sticky top-0 shadow-sm hover:shadow-md transition-shadow"
+                bordered={false}
+              >
+                <Tabs 
+                  defaultActiveKey="senders"
+                  className="search-results-tabs"
+                >
+                  {searchResults.length > 0 && (
+                    <Tabs.TabPane tab="Người gửi" key="senders">
+                      <List
+                        size="small"
+                        dataSource={searchResults}
+                        renderItem={(item) => (
+                          <List.Item
+                            className="hover:bg-blue-50 cursor-pointer"
+                            onClick={() => handleCustomerSelect(item.senderId)}
+                          >
+                            <List.Item.Meta
+                              title={item.name}
+                              description={
+                                <Space direction="vertical" size="small">
+                                  <Typography.Text type="secondary">
+                                    <PhoneOutlined /> {item.phone}
+                                  </Typography.Text>
+                                  <Typography.Text type="secondary" ellipsis>
+                                    <HomeOutlined /> {item.address}
+                                  </Typography.Text>
+                                  <Space>
+                                    {item.facebook && (
+                                      <SiFacebook className="text-blue-600" />
+                                    )}
+                                    {item.zalo && (
+                                      <SiZalo className="text-blue-500" />
+                                    )}
+                                    {item.kakaoTalk && (
+                                      <SiKakaotalk className="text-yellow-500" />
+                                    )}
+                                  </Space>
                                 </Space>
-                              </Space>
-                            }
-                          />
-                        </List.Item>
-                      )}
-                    />
-                  </Tabs.TabPane>
-                )}
-                {recipientResults.length > 0 && (
-                  <Tabs.TabPane tab="Người nhận" key="recipients">
-                    <List
-                      size="small"
-                      dataSource={recipientResults}
-                      renderItem={(item) => (
-                        <List.Item
-                          className="hover:bg-blue-50 cursor-pointer"
-                          onClick={() => handleRecipientSelect(item)}
-                        >
-                          <List.Item.Meta
-                            title={item.name}
-                            description={
-                              <Space direction="vertical" size="small">
-                                <Typography.Text type="secondary">
-                                  <PhoneOutlined /> {item.phone}
-                                </Typography.Text>
-                                <Typography.Text type="secondary" ellipsis>
-                                  <HomeOutlined /> {item.address}
-                                </Typography.Text>
-                              </Space>
-                            }
-                          />
-                        </List.Item>
-                      )}
-                    />
-                  </Tabs.TabPane>
-                )}
-              </Tabs>
-            </div>
-          )}
+                              }
+                            />
+                          </List.Item>
+                        )}
+                      />
+                    </Tabs.TabPane>
+                  )}
+                  {recipientResults.length > 0 && (
+                    <Tabs.TabPane tab="Người nhận" key="recipients">
+                      <List
+                        size="small"
+                        dataSource={recipientResults}
+                        renderItem={(item) => (
+                          <List.Item
+                            className="hover:bg-blue-50 cursor-pointer"
+                            onClick={() => handleRecipientSelect(item)}
+                          >
+                            <List.Item.Meta
+                              title={item.name}
+                              description={
+                                <Space direction="vertical" size="small">
+                                  <Typography.Text type="secondary">
+                                    <PhoneOutlined /> {item.phone}
+                                  </Typography.Text>
+                                  <Typography.Text type="secondary" ellipsis>
+                                    <HomeOutlined /> {item.address}
+                                  </Typography.Text>
+                                </Space>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                      />
+                    </Tabs.TabPane>
+                  )}
+                </Tabs>
+              </Card>
+            )}
+          </div>
         </div>
       </Form>
     </Modal>
   );
 };
 
-// Add some styles to your CSS
+// Add these styles to your CSS file
 const styles = `
-.form-section {
-  padding: 12px;
-  border: 1px solid #f0f0f0;
+.custom-modal .ant-modal-content {
   border-radius: 8px;
-  margin-bottom: 16px;
+  overflow: hidden;
 }
 
-.form-section h3 {
-  margin-bottom: 12px;
-  font-size: 16px;
-  color: #1890ff;
+.custom-modal .ant-card {
+  border-radius: 6px;
+}
+
+.custom-modal .ant-form-item-label > label {
+  font-weight: 500;
+}
+
+.custom-modal .search-results-tabs .ant-tabs-nav {
+  margin-bottom: 8px;
+}
+
+.custom-modal .ant-input,
+.custom-modal .ant-select-selector,
+.custom-modal .ant-input-number {
+  border-radius: 6px;
+}
+
+.custom-modal .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+}
+
+.custom-modal .ant-card-body {
+  padding: 16px;
+}
+
+.custom-modal .ant-form-item {
+  margin-bottom: 16px;
 }
 `;
 

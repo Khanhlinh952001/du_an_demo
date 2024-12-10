@@ -3,7 +3,7 @@ import MainLayout from "@/layout/MainLayout";
 import AddSenderModal from '@/components/modals/AddSenderModal';
 import { useState, useEffect } from 'react';
 import type { Sender } from '@/types/Sender';
-import { Table, Button, Checkbox, Modal, Input, Card } from 'antd';
+import { Table, Button, Checkbox, Modal, Input, Card, DatePicker, Select, Form, Tag } from 'antd';
 import { senderMockData } from '@/mocks/senderMockData';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
@@ -24,6 +24,10 @@ export default function SenderPage() {
   const [selectedSenderId, setSelectedSenderId] = useState<string | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<Sender[]>(senderMockData);
+  const [dateRange, setDateRange] = useState<[any, any]>([null, null]);
+  const [selectedRows, setSelectedRows] = useState<Sender[]>([]);
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [bulkEditForm] = Form.useForm();
 
   const rowClassName = (record: any, index: number) => {
     return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
@@ -34,7 +38,7 @@ export default function SenderPage() {
     { key: 'name', label: 'Tên KH' },
     { key: 'contact', label: 'Thông tin liên hệ' },
     { key: 'social', label: 'Mạng xã hội' },
-    { key: 'contactChannel', label: 'Kênh liên hệ' },
+    { key: 'contactChannels', label: 'Kênh liên hệ' },
     { key: 'orderInfo', label: 'Thông tin đơn hàng' },
     { key: 'dates', label: 'Thời gian' },
     { key: 'phone', label: 'SĐT' },
@@ -46,7 +50,7 @@ export default function SenderPage() {
     name: true,
     contact: true,
     social: true,
-    contactChannel: true,
+    contactChannels: true,
     orderInfo: true,
     dates: true,
     phone: true,
@@ -89,16 +93,31 @@ export default function SenderPage() {
   };
 
   const handleSearch = (value: string) => {
-    if (!value.trim()) {
-      setSearchResults(senders);
-      return;
+    let filtered = senders;
+
+    // Text search (updated to include senderId)
+    if (value.trim()) {
+      filtered = filtered.filter(sender =>
+        sender.name.toLowerCase().includes(value.toLowerCase()) ||
+        sender.phone.includes(value) ||
+        sender.senderId.toLowerCase().includes(value.toLowerCase())  // Add ID search
+      );
     }
 
-    const filtered = senders.filter(sender =>
-      sender.name.toLowerCase().includes(value.toLowerCase()) ||
-      sender.phone.includes(value)
-    );
+    // Date range search
+    if (dateRange[0] && dateRange[1]) {
+      filtered = filtered.filter(sender => {
+        const registerDate = new Date(sender.registerDate);
+        return registerDate >= dateRange[0] && registerDate <= dateRange[1];
+      });
+    }
+
     setSearchResults(filtered);
+  };
+
+  const handleDateRangeChange = (dates: any) => {
+    setDateRange(dates);
+    handleSearch(''); // Trigger search with existing text value
   };
 
   const columnsWithActions = [
@@ -119,7 +138,7 @@ export default function SenderPage() {
             danger
             style={{ marginRight: 8 }}
           />
-          <Button
+           <Button
             icon={<UsergroupAddOutlined />}
             onClick={() => {
               setSelectedSenderId(record.senderId);
@@ -166,81 +185,188 @@ export default function SenderPage() {
     reader.readAsArrayBuffer(file);
   };
 
+  const handleBulkEdit = async (values: any) => {
+    const updatedSenders = senders.map(sender => {
+      if (selectedRows.find(row => row.senderId === sender.senderId)) {
+        return {
+          ...sender,
+          ...values
+        };
+      }
+      return sender;
+    });
+
+    setSenders(updatedSenders);
+    setSearchResults(updatedSenders);
+    setSelectedRows([]);
+    setIsBulkEditModalOpen(false);
+    bulkEditForm.resetFields();
+  };
+
+  const rowSelection = {
+    selectedRowKeys: selectedRows.map(row => row.senderId),
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Sender[]) => {
+      setSelectedRows(selectedRows);
+    },
+    getCheckboxProps: (record: Sender) => ({
+      name: record.senderId,
+    }),
+  };
+
+  const BulkEditModal = () => (
+    <Modal
+      title="Cập nhật hàng loạt"
+      open={isBulkEditModalOpen}
+      onCancel={() => setIsBulkEditModalOpen(false)}
+      onOk={() => bulkEditForm.submit()}
+    >
+      <Form
+        form={bulkEditForm}
+        onFinish={handleBulkEdit}
+        layout="vertical"
+      >
+        <Form.Item name="rating" label="Xếp loại">
+                      <Select 
+                        placeholder="Chọn xếp loại"
+                        className="hover:border-blue-400"
+                        dropdownStyle={{ padding: '8px' }}
+                      >
+                        <Select.Option value="VIP">
+                          <Tag color="gold">VIP</Tag>
+                        </Select.Option>
+                        <Select.Option value="Thường">
+                          <Tag color="blue">Thường</Tag>
+                        </Select.Option>
+                        <Select.Option value="Tiềm năng">
+                          <Tag color="green">Tiềm năng</Tag>
+                        </Select.Option>
+                        <Select.Option value="Xấu">
+                          <Tag color="red">Xấu</Tag>
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+        <Form.Item name="staff" label="Nhân viên">
+          <Select>
+            <Select.Option value="staff1">Nhân viên 1</Select.Option>
+            <Select.Option value="staff2">Nhân viên 2</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item name="note" label="Ghi chú">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="price" label="Đơn giá">
+          <Input type="number" />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+
   return <MainLayout>
     <Card>
-      <div className="flex justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Danh sách  Người Gửi
-          </h1>
-          <p className="text-gray-500 mt-1 mb-4">Quản lý và theo dõi người gửi</p>
+      <div className="space-y-4">
+        {/* Header Section */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Danh sách Người Gửi
+            </h1>
+            <p className="text-gray-500 mt-1">Quản lý và theo dõi người gửi</p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="primary"
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-1"
+            >
+              + Thêm người gửi
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
+
+        {/* Search and Filter Section */}
+        <div className="flex flex-wrap gap-4 items-center">
+          <DatePicker.RangePicker 
+            onChange={handleDateRangeChange}
+            placeholder={['Từ ngày', 'Đến ngày']}
+            style={{ width: 280 }}
+          />
           <Input.Search
-            placeholder="Tìm theo tên/số điện thoại"
+            placeholder="Tìm theo mã KH/tên/số điện thoại"
             onSearch={handleSearch}
             onChange={(e) => handleSearch(e.target.value)}
-            style={{ width: 300 }}
+            style={{ width: 280 }}
+            className="flex-grow"
           />
-          <Button
-            icon={<DownloadOutlined />}
-            onClick={() => setIsExportModalOpen(true)}
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            Xuất Excel
-          </Button>
-          <label htmlFor="upload-excel" className="bg-blue-500 hover:bg-blue-600 text-white px-4 h-8 rounded cursor-pointer flex items-center gap-2">
-            <UploadOutlined />
-            Cập nhật từ Excel
-            <input
-              id="upload-excel"
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleUpdateFromExcel}
-              style={{ display: 'none' }}
-            />
-          </label>
-          <Button
-            type="primary"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Thêm người gửi
-          </Button>
-
+          <div className="flex gap-2 ml-auto">
+            {selectedRows.length > 0 && (
+              <Button
+                onClick={() => setIsBulkEditModalOpen(true)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                Cập nhật {selectedRows.length} bản ghi
+              </Button>
+            )}
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={() => setIsExportModalOpen(true)}
+              className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1"
+            >
+              Xuất Excel
+            </Button>
+            <label htmlFor="upload-excel" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded cursor-pointer flex items-center gap-2">
+              <UploadOutlined />
+              Cập nhật từ Excel
+              <input
+                id="upload-excel"
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleUpdateFromExcel}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <ColumnVisibilityControl
+          columns={columnConfigs}
+          visibleColumns={visibleColumns}
+          onChange={handleColumnVisibilityChange}
+        />
+          </div>
         </div>
-      </div>
 
-      <ColumnVisibilityControl
-        columns={columnConfigs}
-        visibleColumns={visibleColumns}
-        onChange={handleColumnVisibilityChange}
-        className="mb-4"
-      />
+        {/* Column Visibility Control */}
+       
 
-      <Table
-        columns={columnsWithActions}
-        dataSource={searchResults}
-        rowKey="id"
-        size="small"
-        rowClassName={rowClassName}
-        className="bg-white rounded-lg shadow-sm"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Tổng số ${total} người gửi`,
-        }}
-      />
-    </Card>
+        {/* Table */}
+        <Table
+          rowSelection={{
+            type: 'checkbox',
+            ...rowSelection,
+          }}
+          columns={columnsWithActions}
+          dataSource={searchResults}
+          rowKey="senderId"
+          size="small"
+          rowClassName={rowClassName}
+          className="bg-white rounded-lg shadow-sm"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Tổng số ${total} người gửi`,
+          }}
+        />
 
-    <AddSenderModal
-      open={isModalOpen}
-      onCancel={handleModalCancel}
-      onSubmit={handleSubmit}
-      initialData={editingSender}
-      mode={modalMode}
-    />
+        {/* Add BulkEditModal */}
+        <BulkEditModal />
 
-    <Modal
+        {/* Modals */}
+        <AddSenderModal
+          open={isModalOpen}
+          onCancel={handleModalCancel}
+          onSubmit={handleSubmit}
+          initialData={editingSender}
+          mode={modalMode}
+        />
+
+<Modal
       title="Danh sách người nhận"
       open={isRecipientModalOpen}
       onCancel={() => setIsRecipientModalOpen(false)}
@@ -250,11 +376,13 @@ export default function SenderPage() {
       <RecipientList senderId={selectedSenderId || ''} />
     </Modal>
 
-    <ExportModal
-      open={isExportModalOpen}
-      onCancel={() => setIsExportModalOpen(false)}
-      onExport={handleExport}
-      fields={senderExportConfig}
-    />
+        <ExportModal
+          open={isExportModalOpen}
+          onCancel={() => setIsExportModalOpen(false)}
+          onExport={handleExport}
+          fields={senderExportConfig}
+        />
+      </div>
+    </Card>
   </MainLayout>;
 }

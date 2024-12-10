@@ -1,6 +1,6 @@
 import { ColumnsType } from 'antd/es/table';
 import { Order } from '@/types/Order';
-import { ExtendedColumnType } from '../recipients/columns';
+import { ExtendedColumnType } from '../../../components/recipients/columns';
 import { formatDate } from '@/utils/format';
 import { CalendarOutlined, IdcardOutlined, PhoneOutlined, HomeOutlined, UserOutlined, EnvironmentOutlined, InboxOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Tag, Tooltip, Button, Space, Modal } from 'antd';

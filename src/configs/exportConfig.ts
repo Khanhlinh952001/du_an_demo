@@ -39,6 +39,7 @@ export const recipientExportConfig: ExportFieldConfig[] = [
   { key: 'phone', label: 'Số điện thoại' },
   { key: 'address', label: 'Địa chỉ' },
   { key: 'region', label: 'Khu vực' },
+  { key: 'note', label: 'Ghi chú' },
   { key: 'shipper', label: 'Đơn vị vận chuyển' },
   { key: 'status', label: 'Trạng thái' }
 ];

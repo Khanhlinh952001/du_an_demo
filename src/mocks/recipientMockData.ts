@@ -54,3 +54,12 @@ export const recipientsBySender: Record<string, Recipient[]> = {
   'SENDER002': [recipientMockData[2]],
   'SENDER003': recipientMockData,
 }; 
+
+// Function to get recipients by senderId
+export const getRecipientsBySenderId = (senderId: string): Recipient[] => {
+  return recipientMockData.filter(recipient => recipient.senderId === senderId);
+};
+
+// Example usage:
+// const recipientsForSender = getRecipientsBySenderId('KH001');
+// This will return an array of recipients where senderId === 'KH001'

@@ -47,7 +47,7 @@ const menuItems: MenuProps['items'] = [
       },
       { 
         key: '6-2', 
-        label: <Link href="/pages/receivers" style={{ color: 'inherit' }}>Người nhận</Link>,
+        label: <Link href="/pages/recipients" style={{ color: 'inherit' }}>Người nhận</Link>,
         icon: <UserOutlined />
       },
     ]
@@ -61,8 +61,8 @@ const pathToKeyMap: Record<string, string[]> = {
   '/pages/orders': ['3'],
   '/pages/manifest': ['4'],
   '/pages/debt': ['5'],
-  '/pages/senders': ['6', '6-1'],
-  '/pages/receivers': ['6', '6-2'],
+  '/pages/sender': ['6', '6-1'],
+  '/pages/recipients': ['6', '6-2'],
   '/pages/settings': ['7'],
 };
 
@@ -120,7 +120,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathName = usePathname();
   const selectedKeys = React.useMemo(() => {
     const keys = pathToKeyMap[pathName] || [''];
-    return [keys[0]];
+    return keys;
   }, [pathName]);
 
   return (

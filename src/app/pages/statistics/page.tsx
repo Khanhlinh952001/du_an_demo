@@ -1,6 +1,3 @@
-
-
-
 "use client"
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, Row, Col, Typography, Table, Statistic, Progress, DatePicker, Select, Button, Space, message } from 'antd';
@@ -71,6 +68,9 @@ const StatisticsPage = () => {
       growth: 0
     }
   });
+
+  // Thêm state cho số lượng khách hàng hiển thị
+  const [customerLimit, setCustomerLimit] = useState<number>(5);
 
   // Hàm xuất báo cáo
   const exportReport = () => {
@@ -161,11 +161,11 @@ const StatisticsPage = () => {
 
   // Data top khách hàng
   const topCustomersData = [
-    { name: 'Công ty A', orders: 150, revenue: 450000000 },
-    { name: 'Công ty B', orders: 120, revenue: 380000000 },
-    { name: 'Công ty C', orders: 100, revenue: 320000000 },
-    { name: 'Công ty D', orders: 90, revenue: 280000000 },
-    { name: 'Công ty E', orders: 80, revenue: 250000000 },
+    { name: 'VO VAN A', orders: 150, revenue: 450000000 },
+    { name: 'VO VAN  B', orders: 120, revenue: 380000000 },
+    { name: 'VO VAN  C', orders: 100, revenue: 320000000 },
+    { name: 'VO VAN  D', orders: 90, revenue: 280000000 },
+    { name: 'VO VAN  E', orders: 80, revenue: 250000000 },
   ];
 
   const topCustomersColumns = [
@@ -424,14 +424,14 @@ const StatisticsPage = () => {
 
       {/* Thống kê chi tiết - Row 2 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+        <Col span={8}>
           <Card 
             title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Tổng tiền cần thanh toán</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >
             <Statistic
-              value={0}
+              value={1500000000}
               prefix={<CreditCardOutlined style={{ color: '#722ed1' }} />}
               suffix="VNĐ"
               valueStyle={{ color: '#722ed1', fontWeight: 'bold', fontSize: 24 }}
@@ -441,14 +441,14 @@ const StatisticsPage = () => {
             </div>
           </Card>
         </Col>
-        <Col span={12}>
+        <Col span={8}>
           <Card 
             title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Đã thanh toán</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >
             <Statistic
-              value={0}
+              value={1000000000}
               prefix={<DollarOutlined style={{ color: '#52c41a' }} />}
               suffix="VNĐ"
               valueStyle={{ color: '#52c41a', fontWeight: 'bold', fontSize: 24 }}
@@ -458,13 +458,30 @@ const StatisticsPage = () => {
             </div>
           </Card>
         </Col>
+        <Col span={8}>
+          <Card 
+            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Còn lại cần thanh toán</span>}
+            style={{ borderRadius: 8 }}
+            hoverable
+          >
+            <Statistic
+              value={500000000}
+              prefix={<DollarOutlined style={{ color: '#f5222d' }} />}
+              suffix="VNĐ"
+              valueStyle={{ color: '#f5222d', fontWeight: 'bold', fontSize: 24 }}
+            />
+            <div style={{ marginTop: 8, color: '#8c8c8c' }}>
+              Số đơn chưa thanh toán: 30
+            </div>
+          </Card>
+        </Col>
       </Row>
 
       {/* Biểu đồ doanh số và Top khách hàng - Row 3 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Phân tích doanh thu</span>}
+            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Doanh thu theo dịch vụ</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >
@@ -473,13 +490,27 @@ const StatisticsPage = () => {
         </Col>
         <Col span={12}>
           <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Top khách hàng</span>}
+            title={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Top khách hàng</span>
+                <Select
+                  value={customerLimit}
+                  onChange={setCustomerLimit}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value={5}>Top 5</Option>
+                  <Option value={10}>Top 10</Option>
+                  <Option value={15}>Top 15</Option>
+                </Select>
+              </div>
+            }
             style={{ borderRadius: 8 }}
             hoverable
           >
             <Table 
               columns={topCustomersColumns} 
-              dataSource={topCustomersData} 
+              dataSource={topCustomersData.slice(0, customerLimit)} 
               pagination={false}
               size="small"
             />
@@ -491,7 +522,7 @@ const StatisticsPage = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={8}>
           <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Phân tích theo khu vực</span>}
+            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>So sánh theo khu vực</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >
@@ -563,73 +594,11 @@ const StatisticsPage = () => {
             ))}
           </Card>
         </Col>
-        <Col span={8}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Hiệu suất giao hàng</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <Statistic
-              title="Tỷ lệ giao hàng thành công"
-              value={95.8}
-              precision={1}
-              prefix={<RiseOutlined />}
-              suffix="%"
-            />
-            <Statistic
-              title="Thời gian giao hàng trung bình"
-              value={2.3}
-              precision={1}
-              suffix="ngày"
-              style={{ marginTop: 16 }}
-            />
-          </Card>
-        </Col>
+        
       </Row>
 
       {/* Thêm Card cho phân tích xu hướng */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={12}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Xu hướng đơn hàng</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <Line data={trendChartData} options={trendChartOptions} />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Phân tích hiệu suất nhân viên</span>}
-            style={{ borderRadius: 8 }}
-            hoverable
-          >
-            <Table 
-              columns={[
-                {
-                  title: 'Nhân viên',
-                  dataIndex: 'name',
-                  key: 'name',
-                },
-                {
-                  title: 'Đơn hàng đã xử lý',
-                  dataIndex: 'ordersProcessed', 
-                  key: 'ordersProcessed',
-                },
-                {
-                  title: 'Tỷ lệ hoàn thành',
-                  dataIndex: 'completionRate',
-                  key: 'completionRate',
-                  render: (value: number) => `${value}%`
-                }
-              ]}
-              dataSource={employeePerformanceData}
-              pagination={false}
-              size="small"
-            />
-          </Card>
-        </Col>
-      </Row>
+      
 
     
       {/* Thêm Row phân tích so sánh */}
@@ -664,7 +633,7 @@ const StatisticsPage = () => {
         </Col>
         <Col span={12}>
           <Card 
-            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Miền Nam (theo bộ lọc)</span>}
+            title={<span style={{ color: '#096dd9', fontSize: 16, fontWeight: 600 }}>Miền Nam</span>}
             style={{ borderRadius: 8 }}
             hoverable
           >

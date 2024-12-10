@@ -10,44 +10,49 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: <><CalendarOutlined /> Ngày Xuất</>,
     dataIndex: 'createdAt',
     key: 'createdAt',
-    width: 120,
+    width: 150,
+    fixed: 'left',
     render: (date: Date) => formatDate(date)
   },
   {
     title: <><IdcardOutlined /> Mã Đơn Hàng</>,
     dataIndex: 'orderId',
     key: 'orderId',
-    width: 120,
+    width: 150,
+    fixed: 'left',
   },
   {
     title: <><UserOutlined /> Người Gửi</>,
     dataIndex: 'senderName',
     key: 'senderName',
-    width: 120,
+    width: 180,
   },
   {
     title: <><PhoneOutlined /> SĐT Người Gửi</>,
     dataIndex: 'senderPhone',
     key: 'senderPhone',
-    width: 120,
+    width: 150,
   },
   {
-    title: <><HomeOutlined /> Địa Chỉ Người Gửi</>,
+    title: <><EnvironmentOutlined /> Địa Chỉ Người Gửi</>,
     dataIndex: 'senderAddress',
     key: 'senderAddress',
-    width: 120,
+    width: 250,
+    ellipsis: {
+      showTitle: true,
+    },
   },
   {
     title: <><UserOutlined /> Người Nhận</>,
     dataIndex: 'receiverName',
     key: 'receiverName',
-    width: 120,
+    width: 180,
   },
   {
     title: <><PhoneOutlined /> SĐT Người Nhận</>,
     dataIndex: 'receiverPhone',
     key: 'receiverPhone',
-    width: 120,
+    width: 150,
   },
   {
     title: <><EnvironmentOutlined /> Khu Vực</>,
@@ -59,13 +64,16 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: <><HomeOutlined /> Địa Chỉ Người Nhận</>,
     dataIndex: 'receiverAddress',
     key: 'receiverAddress',
-    width: 120,
+    width: 250,
+    ellipsis: {
+      showTitle: true,
+    },
   },
   {
     title: <><InboxOutlined /> Số Kiện</>,
     dataIndex: 'totalPackages',
     key: 'totalPackages',
-    width: 120,
+    width: 100,
   },
   {
     title: <><InboxOutlined /> Trọng Lượng</>,
@@ -83,13 +91,13 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: <><DollarOutlined /> Thành Tiền</>,
     dataIndex: 'totalAmount',
     key: 'totalAmount',
-    width: 120,
+    width: 150,
   },
   {
     title: 'Trạng Thái Thanh Toán',
     dataIndex: 'paymentStatus',
     key: 'paymentStatus',
-    width: 120,
+    width: 180,
     render: (paymentStatus: boolean) => {
       return (
         <Tag color={paymentStatus ? "success" : "error"}>
@@ -102,6 +110,9 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: <><FileTextOutlined /> Ghi Chú</>,
     dataIndex: 'note',
     key: 'note',
-    width: 120,
+    width: 200,
+    ellipsis: {
+      showTitle: true,
+    },
   },
 ]

@@ -30,7 +30,7 @@ export const OrderMockData: Order[] = [
       note: 'Ghi chú mẫu',
       receiverRegion: 'SGN' ,
       
-      price:8000   // SĐT người nhận
+      price:8000   
     },
     {
       orderId: 'ORD002',
@@ -59,7 +59,7 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'UNPAID',
       totalAmount: 2500000,
       note: 'Hàng dễ vỡ',
-      receiverRegion: 'HN',
+      receiverRegion: 'HAN',
       price: 12000
     },
     {
@@ -89,7 +89,7 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'PARTIAL',
       totalAmount: 800000,
       note: 'Giao hàng giờ hành chính',
-      receiverRegion: 'HN',
+      receiverRegion: 'HAN',
       price: 6000
     },
     {
@@ -118,7 +118,7 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'UNPAID',
       totalAmount: 1200000,
       note: 'Giao buổi sáng',
-      receiverRegion: 'HN',
+      receiverRegion: 'HAN',
       price: 7000
     },
     {
@@ -147,7 +147,7 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'UNPAID',
       totalAmount: 1800000,
       note: 'Giao giờ hành chính',
-      receiverRegion: 'HN',
+      receiverRegion: 'HAN',
       price: 9000
     }
 ];

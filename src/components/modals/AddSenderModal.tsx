@@ -1,9 +1,13 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, DatePicker, Select } from 'antd';
+"use client"
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, DatePicker, Select, Row, Col, Card, Space, Checkbox, Button, Table, Tag } from 'antd';
 import type { Sender } from '@/types/Sender';
 import dayjs from 'dayjs';
-import { FacebookFilled, MessageFilled, UserOutlined, PhoneOutlined, EnvironmentOutlined, CalendarOutlined } from '@ant-design/icons';
-
+import { FacebookOutlined, MessageFilled, UserOutlined, PhoneOutlined, EnvironmentOutlined, CalendarOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SiZalo } from 'react-icons/si';
+import AddRecipientModal from './AddRecipientModal';
+import { getRecipientsBySenderId } from '@/mocks/recipientMockData';
+import RecipientList from '../recipients/RecipientList';
 interface AddSenderModalProps {
   open: boolean;
   onCancel: () => void;
@@ -14,6 +18,9 @@ interface AddSenderModalProps {
 
 const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmit, initialData, mode = 'add' }) => {
   const [form] = Form.useForm();
+  const [receivers, setReceivers] = useState<any[]>([]);
+  const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<any>(null);
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -24,15 +31,26 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
     }
   }, [initialData, form, mode]);
 
+  useEffect(() => {
+    const senderId = form.getFieldValue('senderId');
+    if (senderId) {
+      const existingRecipients = getRecipientsBySenderId(senderId);
+      setReceivers(existingRecipients);
+    }
+  }, [form.getFieldValue('senderId')]);
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      if (!values.facebook && !values.zalo && !values.kakaoTalk) {
-        throw new Error('Vui lòng nhập ít nhất một kênh liên hệ');
+      const contactChannels = values.contactChannels || [];
+      
+      if (contactChannels.length === 0) {
+        throw new Error('Vui lòng chọn ít nhất một kênh liên hệ');
       }
+      
       onSubmit({
         ...values,
-        joinDate: values.joinDate.toISOString(),
+        joinDate: values.joinDate?.toISOString(),
         registerDate: new Date().toISOString(),
       });
       form.resetFields();
@@ -47,13 +65,25 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
     }
   };
 
+  const handleRecipientSubmit = (values: any) => {
+    setReceivers([...receivers, values]);
+    setIsRecipientModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setReceivers([]);
+    setSelectedRecipient(null);
+    onCancel();
+  };
+
   return (
     <Modal
       title={mode === 'add' ? "Thêm người gửi mới" : "Chỉnh sửa người gửi"}
       open={open}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       onOk={handleSubmit}
-      width={900}
+      width={1200}
     >
       <Form
         form={form}
@@ -63,94 +93,345 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
         }}
         style={{ padding: '20px' }}
       >
-        <div style={{ marginBottom: '24px' }}>
-          <h3><UserOutlined style={{ color: '#1890ff', marginRight: '8px' }} />Thông tin cơ bản</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <Form.Item
+        <Row gutter={16} >
+          <Col span={12}>
+            <Card title="Thông tin người gửi" style={{ marginBottom: '24px', height: '400px' }}> <Form.Item
               name="senderId"
               label="Mã khách hàng"
-              rules={[
-                { required: true, message: 'Vui lòng nhập mã khách hàng' },
-                { pattern: /^[A-Za-z0-9]+$/, message: 'Mã khách hàng chỉ được chứa chữ và số' }
-              ]}
+             
             >
-              <Input placeholder="Nhập mã khách hàng" />
+              <Input placeholder="Nhập mã khách hàng"  disabled/>
             </Form.Item>
-
-            <Form.Item
-              name="name"
-              label="Tên khách hàng"
-              rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}
-            >
-              <Input placeholder="Nhập tên khách hàng" />
+            <Space style={{ width: '100%' }} direction="horizontal" size="small">
+              <Form.Item name="phone" label="Số điện thoại" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}>
+                <Input placeholder="Nhập số điện thoại" />
+              </Form.Item>
+              <Form.Item name="name" label="Tên khách hàng" rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}>
+                <Input placeholder="Nhập tên khách hàng" />
+              </Form.Item>
+            </Space>
+            <Form.Item name="contactChannels">
+              <h4>Liên hệ</h4>
+              <Checkbox.Group>
+                <Space>
+                  <Checkbox value="facebook">Facebook</Checkbox>
+                  <Checkbox value="zalo">Zalo</Checkbox>
+                  <Checkbox value="kakaoTalk">Kakaotalk</Checkbox>
+                </Space>
+              </Checkbox.Group>
             </Form.Item>
-
-            <Form.Item
-              name="phone"
-              label="Số điện thoại"
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại' },
-                { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại không hợp lệ' }
-              ]}
-            >
-              <Input prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />} placeholder="Nhập số điện thoại" />
-            </Form.Item>
-
+            <Space>
+              <Form.Item name="facebook" style={{ marginBottom: 0 }}>
+                <Input prefix={<FacebookOutlined />} placeholder="Facebook" style={{ width: 150 }} />
+              </Form.Item>
+              <Form.Item name="zalo" style={{ marginBottom: 0 }}>
+                <Input prefix={<SiZalo />} placeholder="Zalo" style={{ width: 150 }} />
+              </Form.Item>
+            </Space>
+            </Card>
            
-          </div>
-
-          <Form.Item
-            name="address"
-            label="Địa chỉ"
-            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
-          >
-            <Input.TextArea rows={2} placeholder="Nhập địa chỉ" />
-          </Form.Item>
-        </div>
-
-        <div>
-          <h3>Thông tin liên hệ</h3>
-          <Form.Item
-            name="contactChannel"
-            label="Kênh liên hệ chính"
-            rules={[{ required: true, message: 'Vui lòng chọn kênh liên hệ chính' }]}
-          >
-            <Select>
-              <Select.Option value="Facebook">
-                <FacebookFilled style={{ color: '#1877F2' }} /> Facebook
-              </Select.Option>
-              <Select.Option value="Zalo">
-                <MessageFilled style={{ color: '#0068FF' }} /> Zalo
-              </Select.Option>
-              <Select.Option value="KakaoTalk">
-                <MessageFilled style={{ color: '#FFE812' }} /> KakaoTalk
-              </Select.Option>
-            </Select>
-          </Form.Item>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-            <Form.Item
-              name="facebook"
-              label="Facebook"
+          </Col>
+          <Col span={12}>
+            <Card 
+              title="* Thông tin người nhận: " 
+              style={{ marginBottom: '24px', height: '400px' }}
+              extra={
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<PlusOutlined />}
+                  onClick={() => setIsRecipientModalOpen(true)}
+                  disabled={!form.getFieldValue('senderId')}
+                  title={!form.getFieldValue('senderId') ? "Vui lòng nhập mã khách hàng trước" : ""}
+                >
+                  Thêm người nhận
+                </Button>
+              }
             >
-              <Input placeholder="Nhập tài khoản Facebook" />
-            </Form.Item>
+              <Table 
+                size="small"
+                dataSource={receivers} 
+                columns={[
+                  {
+                    title: 'Tên người nhận',
+                    dataIndex: 'name',
+                    key: 'name',
+                  },
+                  {
+                    title: 'Số điện thoại',
+                    dataIndex: 'phone',
+                    key: 'phone',
+                  },
+                  {
+                    title: 'Địa chỉ',
+                    dataIndex: 'address',
+                    key: 'address',
+                  },
+                  {
+                    title: 'Khu vực',
+                    dataIndex: 'region',
+                    key: 'region',
+                    render: (area: string) => (
+                      <Tag color={area === 'HAN' ? 'blue' : 'green'}>
+                        {area}
+                      </Tag>
+                    ),
+                  },
+                  {
+                    title: 'Thao tác',
+                    key: 'actions',
+                    width: 120,
+                    render: (_, record, index) => (
+                      <Space>
+                        <Button
+                          type="text"
+                          icon={<EditOutlined />}
+                          onClick={() => {
+                            setSelectedRecipient(record);
+                            setIsRecipientModalOpen(true);
+                          }}
+                        />
+                        <Button
+                          type="text"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => {
+                            Modal.confirm({
+                              title: 'Xác nhận xóa',
+                              content: 'Bạn có chắc chắn muốn xóa người nhận này?',
+                              onOk: () => {
+                                const newReceivers = [...receivers];
+                                newReceivers.splice(index, 1);
+                                setReceivers(newReceivers);
+                              }
+                            });
+                          }}
+                        />
+                      </Space>
+                    ),
+                  }
+                ]} 
+                pagination={false}
+                locale={{ emptyText: 'Chưa có người nhận nào' }}
+              />
+            </Card>
 
-            <Form.Item
-              name="zalo"
-              label="Zalo"
-            >
-              <Input placeholder="Nhập tài khoản Zalo" />
-            </Form.Item>
+            <AddRecipientModal
+              open={isRecipientModalOpen}
+              onCancel={() => {
+                setIsRecipientModalOpen(false);
+                setSelectedRecipient(null);
+              }}
+              onSubmit={(values) => {
+                if (selectedRecipient) {
+                  // Edit mode
+                  const newReceivers = receivers.map(r => 
+                    r.id === selectedRecipient.id ? { ...values, id: r.id } : r
+                  );
+                  setReceivers(newReceivers);
+                } else {
+                  // Add mode
+                  setReceivers([...receivers, { ...values, id: Date.now() }]);
+                }
+                setIsRecipientModalOpen(false);
+                setSelectedRecipient(null);
+              }}
+              mode={selectedRecipient ? 'edit' : 'add'}
+              initialData={selectedRecipient}
+            />
+          </Col>
+          </Row>
 
-            <Form.Item
-              name="kakaoTalk"
-              label="KakaoTalk"
+          <Row gutter={16} >
+          <Col span={12}>
+            <Card 
+              className="bg-white"
+              title={
+                <div className="flex items-center gap-2 text-base font-medium">
+                  <span role="img" aria-label="shipping">🚚</span>
+                  Dịch vụ vận chuyển quan tâm
+                </div>
+              } 
+              style={{ marginBottom: '24px', height: '500px' }}
             >
-              <Input placeholder="Nhập tài khoản KakaoTalk" />
-            </Form.Item>
-          </div>
-        </div>
+              {/* Air Service Korea -> Vietnam */}
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3 text-base font-medium">
+                  <span role="img" aria-label="airplane">✈️</span>
+                  Đơn giá bay Hàn-Việt
+                </div>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item name="hanPrice" className="mb-3">
+                      <Input
+                        addonBefore={<Tag color="blue">HAN</Tag>}
+                        type="number"
+                        placeholder="Giá HAN"
+                        prefix="₩"
+                        className="w-full"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name="sgnPrice" className="mb-3">
+                      <Input
+                        addonBefore={<Tag color="blue">SGN</Tag>}
+                        type="number"
+                        placeholder="Giá SGN"
+                        prefix="₩"
+                        className="w-full"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </div>
+
+              {/* Air Service Vietnam -> Korea */}
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3 text-base font-medium">
+                  <span role="img" aria-label="airplane">✈️</span>
+                  Đơn giá bay Việt-Hàn
+                </div>
+                <Row gutter={16}>
+                <Col span={12}>
+                    <Form.Item name="priceInKRW" className="mb-3">
+                      <Input
+                        addonBefore={<Tag color="blue">WON</Tag>}
+                        type="number"
+                        placeholder="Giá HAN"
+                        prefix="₩"
+                        className="w-full"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name="priceInVND" className="mb-3">
+                      <Input
+                        addonBefore={<Tag color="blue">VND</Tag>}
+                        type="number"
+                        placeholder="Giá SGN"
+                        prefix="₫"
+                        className="w-full"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                
+              </div>
+
+              {/* Sea Service */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3 text-base font-medium">
+                  <span role="img" aria-label="ship">🚢</span>
+                  Đơn giá vận chuyển đường biển
+                </div>
+                <Form.Item name="seaPrice" className="mb-0">
+                  <Input
+                    type="number"
+                    placeholder="Nhập đơn giá đường biển"
+                    prefix="₫"
+                    className="w-full"
+                  />
+                </Form.Item>
+              </div>
+
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card 
+              title="* Dịch vụ khác: " 
+              style={{ marginBottom: '24px', height: '500px' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item name="exchangeRate" label="Tỷ giá">
+                      <Input
+                        type="number"
+                        placeholder="Nhập tỷ giá"
+                        prefix="₩/₫"
+                        className="hover:border-blue-400"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name="serviceFee" label="Công mua">
+                      <Input
+                        type="number"
+                        placeholder="Nhập công mua"
+                        prefix="%"
+                        className="hover:border-blue-400"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item name="rating" label="Xếp loại">
+                      <Select 
+                        placeholder="Chọn xếp loại"
+                        className="hover:border-blue-400"
+                        dropdownStyle={{ padding: '8px' }}
+                      >
+                        <Select.Option value="VIP">
+                          <Tag color="gold">VIP</Tag>
+                        </Select.Option>
+                        <Select.Option value="Thường">
+                          <Tag color="blue">Thường</Tag>
+                        </Select.Option>
+                        <Select.Option value="Tiềm năng">
+                          <Tag color="green">Tiềm năng</Tag>
+                        </Select.Option>
+                        <Select.Option value="Xấu">
+                          <Tag color="red">Xấu</Tag>
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name="employee" label="Nhân viên phụ trách">
+                      <Select 
+                        placeholder="Chọn nhân viên"
+                        className="hover:border-blue-400"
+                        dropdownStyle={{ padding: '8px' }}
+                      >
+                        <Select.Option value="nv1">
+                          <Space>
+                            <UserOutlined style={{ color: '#1890ff' }} />
+                            Nhân viên 1
+                          </Space>
+                        </Select.Option>
+                        <Select.Option value="nv2">
+                          <Space>
+                            <UserOutlined style={{ color: '#1890ff' }} />
+                            Nhân viên 2
+                          </Space>
+                        </Select.Option>
+                        <Select.Option value="nv3">
+                          <Space>
+                            <UserOutlined style={{ color: '#1890ff' }} />
+                            Nhân viên 3
+                          </Space>
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Form.Item name="notes" label="Ghi chú">
+                  <Input.TextArea
+                    rows={4}
+                    placeholder="Nhập ghi chú"
+                    className="hover:border-blue-400"
+                  />
+                </Form.Item>
+              </Space>
+            </Card>
+          </Col>
+          </Row>   
+        
+  
       </Form>
     </Modal>
   );

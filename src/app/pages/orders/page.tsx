@@ -28,6 +28,7 @@ export default function CreateSingleOrder() {
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [lastClickedOrder, setLastClickedOrder] = useState<string | null>(null);
   const [printStatuses, setPrintStatuses] = useState<Record<string, 'Đã in' | 'Chưa in'>>({});
+  const [showUnprintedOnly, setShowUnprintedOnly] = useState(false);
 
   // Cu hình các cột quan trọng nhất
   const columnConfigs = [
@@ -128,6 +129,7 @@ export default function CreateSingleOrder() {
       orders.forEach(order => {
         newStatuses[order.orderId] = 'Đã in';
       });
+      localStorage.setItem('printStatuses', JSON.stringify(newStatuses));
       return newStatuses;
     });
     setIsDetailsModalOpen(false);
@@ -181,7 +183,7 @@ export default function CreateSingleOrder() {
     title: 'Thao tác',
     key: 'action',
     fixed: 'right',
-    width: 250,
+    width: 180,
     render: (_, record) => (
       <div className="flex gap-2">
         <Button
@@ -244,7 +246,7 @@ export default function CreateSingleOrder() {
     }
   };
 
-  // Thêm nút in cho các đ��n hàng đã chọn
+  // Thêm nút in cho các đơn hàng đã chọn
   const renderBulkActions = () => (
     <div className="mb-4">
       {selectedOrders.length > 0 && (
@@ -284,6 +286,11 @@ export default function CreateSingleOrder() {
     }
   }, []); // Empty dependency array means this runs once on mount
 
+  // Add filter function for orders
+  const filteredOrders = showUnprintedOnly
+    ? orders.filter(order => printStatuses[order.orderId] !== 'Đã in')
+    : orders;
+
   return (
     <MainLayout>
       <Card className="shadow-sm">
@@ -302,13 +309,13 @@ export default function CreateSingleOrder() {
             >
               Xuất Excel
             </Button>
-            <Button
+            {/* <Button
               icon={<DownloadOutlined />}
               className="bg-blue-500 hover:bg-blue-600 text-white border-none"
               onClick={() => document.getElementById('upload-excel')?.click()}
             >
               Nhập Excel
-            </Button>
+            </Button> */}
             <input
               id="upload-excel"
               type="file"
@@ -330,16 +337,34 @@ export default function CreateSingleOrder() {
             >
               Tạo một đơn
             </Button>
+            <ColumnVisibilityControl
+              columns={columnConfigs}
+              visibleColumns={visibleColumns}
+              onChange={handleColumnVisibilityChange}
+            />
           </div>
         </div>
 
-        <div className="mb-4 bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Tùy chỉnh hiển thị</h3>
-          <ColumnVisibilityControl
-            columns={columnConfigs}
-            visibleColumns={visibleColumns}
-            onChange={handleColumnVisibilityChange}
-          />
+        <div className="mb-4 space-y-4">
+          {/* Add filter toggle button */}
+          <div className="flex items-center space-x-2">
+            <Button
+              type={showUnprintedOnly ? "primary" : "default"}
+              icon={<PrinterOutlined />}
+              onClick={() => setShowUnprintedOnly(!showUnprintedOnly)}
+              className={showUnprintedOnly ? "bg-blue-500" : ""}
+            >
+              {showUnprintedOnly ? "Đang lọc đơn chưa in" : "Lọc đơn chưa in"}
+            </Button>
+            {showUnprintedOnly && (
+              <span className="text-gray-500">
+                ({filteredOrders.length} đơn chưa in)
+              </span>
+            )}
+          </div>
+
+          {/* Existing column visibility control */}
+          
         </div>
 
         {/* Thêm bulk actions */}
@@ -348,7 +373,7 @@ export default function CreateSingleOrder() {
         <Table 
           rowSelection={rowSelection}
           columns={updatedFilteredColumns}
-          dataSource={orders}
+          dataSource={filteredOrders}
           rowKey="orderId"
           onRow={(record) => ({
             onClick: () => handleRowClick(record),

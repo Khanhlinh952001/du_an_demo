@@ -1,6 +1,6 @@
 export const REGION = {
     SGN: 'SGN',  // Sài Gòn
-    HN: 'HN',    // Hà Nội
+    HN: 'HAN',    // Hà Nội
     // ... các region khác
 } as const;
 
