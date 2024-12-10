@@ -8,23 +8,6 @@ import React from 'react';
 import QRCode from 'react-qr-code';
 import dynamic from 'next/dynamic';
 
-// Dynamically import PDFDownloadLink with SSR disabled
-const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink),
-  { ssr: false }
-);
-
-// If you're also using Document and Page components, import them similarly
-const Document = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.Document),
-  { ssr: false }
-);
-
-const Page = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.Page),
-  { ssr: false }
-);
-
 interface PrintModalProps {
   open: boolean;
   onCancel: () => void;

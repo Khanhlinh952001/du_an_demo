@@ -43,11 +43,11 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
     try {
       const values = await form.validateFields();
       const contactChannels = values.contactChannels || [];
-      
+
       if (contactChannels.length === 0) {
         throw new Error('Vui lòng chọn ít nhất một kênh liên hệ');
       }
-      
+
       onSubmit({
         ...values,
         joinDate: values.joinDate?.toISOString(),
@@ -95,50 +95,51 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
       >
         <Row gutter={16} >
           <Col span={12}>
-            <Card title="Thông tin người gửi" style={{ marginBottom: '24px', height: '400px' }}> <Form.Item
+            <Card title="Thông tin người gửi" style={{ marginBottom: '24px', height: '400px' }}> 
+              <Form.Item
               name="senderId"
               label="Mã khách hàng"
-             
+
             >
-              <Input placeholder="Nhập mã khách hàng"  disabled/>
+              <Input placeholder="Nhập mã khách hàng" disabled />
             </Form.Item>
-            <Space style={{ width: '100%' }} direction="horizontal" size="small">
-              <Form.Item name="phone" label="Số điện thoại" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}>
-                <Input placeholder="Nhập số điện thoại" />
+              <Space style={{ width: '100%' }} direction="horizontal" size="small">
+                <Form.Item name="phone" label="Số điện thoại" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}>
+                  <Input placeholder="Nhập số điện thoại" />
+                </Form.Item>
+                <Form.Item name="name" label="Tên khách hàng" rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}>
+                  <Input placeholder="Nhập tên khách hàng" />
+                </Form.Item>
+              </Space>
+              <Form.Item name="contactChannels">
+                <h4>Liên hệ</h4>
+                <Checkbox.Group>
+                  <Space>
+                    <Checkbox value="facebook">Facebook</Checkbox>
+                    <Checkbox value="zalo">Zalo</Checkbox>
+                    <Checkbox value="kakaoTalk">Kakaotalk</Checkbox>
+                  </Space>
+                </Checkbox.Group>
               </Form.Item>
-              <Form.Item name="name" label="Tên khách hàng" rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}>
-                <Input placeholder="Nhập tên khách hàng" />
-              </Form.Item>
-            </Space>
-            <Form.Item name="contactChannels">
-              <h4>Liên hệ</h4>
-              <Checkbox.Group>
-                <Space>
-                  <Checkbox value="facebook">Facebook</Checkbox>
-                  <Checkbox value="zalo">Zalo</Checkbox>
-                  <Checkbox value="kakaoTalk">Kakaotalk</Checkbox>
-                </Space>
-              </Checkbox.Group>
-            </Form.Item>
-            <Space>
-              <Form.Item name="facebook" style={{ marginBottom: 0 }}>
-                <Input prefix={<FacebookOutlined />} placeholder="Facebook" style={{ width: 150 }} />
-              </Form.Item>
-              <Form.Item name="zalo" style={{ marginBottom: 0 }}>
-                <Input prefix={<SiZalo />} placeholder="Zalo" style={{ width: 150 }} />
-              </Form.Item>
-            </Space>
+              <Space>
+                <Form.Item name="facebook" style={{ marginBottom: 0 }}>
+                  <Input prefix={<FacebookOutlined />} placeholder="Facebook" style={{ width: 150 }} />
+                </Form.Item>
+                <Form.Item name="zalo" style={{ marginBottom: 0 }}>
+                  <Input prefix={<SiZalo />} placeholder="Zalo" style={{ width: 150 }} />
+                </Form.Item>
+              </Space>
             </Card>
-           
+
           </Col>
           <Col span={12}>
-            <Card 
-              title="* Thông tin người nhận: " 
+            <Card
+              title="* Thông tin người nhận: "
               style={{ marginBottom: '24px', height: '400px' }}
               extra={
-                <Button 
-                  type="primary" 
-                  size="small" 
+                <Button
+                  type="primary"
+                  size="small"
                   icon={<PlusOutlined />}
                   onClick={() => setIsRecipientModalOpen(true)}
                   disabled={!form.getFieldValue('senderId')}
@@ -148,9 +149,9 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                 </Button>
               }
             >
-              <Table 
+              <Table
                 size="small"
-                dataSource={receivers} 
+                dataSource={receivers}
                 columns={[
                   {
                     title: 'Tên người nhận',
@@ -210,7 +211,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                       </Space>
                     ),
                   }
-                ]} 
+                ]}
                 pagination={false}
                 locale={{ emptyText: 'Chưa có người nhận nào' }}
               />
@@ -225,7 +226,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
               onSubmit={(values) => {
                 if (selectedRecipient) {
                   // Edit mode
-                  const newReceivers = receivers.map(r => 
+                  const newReceivers = receivers.map(r =>
                     r.id === selectedRecipient.id ? { ...values, id: r.id } : r
                   );
                   setReceivers(newReceivers);
@@ -240,18 +241,18 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
               initialData={selectedRecipient}
             />
           </Col>
-          </Row>
+        </Row>
 
-          <Row gutter={16} >
+        <Row gutter={16} >
           <Col span={12}>
-            <Card 
+            <Card
               className="bg-white"
               title={
                 <div className="flex items-center gap-2 text-base font-medium">
                   <span role="img" aria-label="shipping">🚚</span>
                   Dịch vụ vận chuyển quan tâm
                 </div>
-              } 
+              }
               style={{ marginBottom: '24px', height: '500px' }}
             >
               {/* Air Service Korea -> Vietnam */}
@@ -293,7 +294,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                   Đơn giá bay Việt-Hàn
                 </div>
                 <Row gutter={16}>
-                <Col span={12}>
+                  <Col span={12}>
                     <Form.Item name="priceInKRW" className="mb-3">
                       <Input
                         addonBefore={<Tag color="blue">WON</Tag>}
@@ -316,7 +317,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                     </Form.Item>
                   </Col>
                 </Row>
-                
+
               </div>
 
               {/* Sea Service */}
@@ -338,8 +339,8 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
             </Card>
           </Col>
           <Col span={12}>
-            <Card 
-              title="* Dịch vụ khác: " 
+            <Card
+              title="* Dịch vụ khác: "
               style={{ marginBottom: '24px', height: '500px' }}
             >
               <Space direction="vertical" style={{ width: '100%' }} size="middle">
@@ -365,11 +366,11 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                     </Form.Item>
                   </Col>
                 </Row>
-                
+
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item name="rating" label="Xếp loại">
-                      <Select 
+                      <Select
                         placeholder="Chọn xếp loại"
                         className="hover:border-blue-400"
                         dropdownStyle={{ padding: '8px' }}
@@ -391,7 +392,7 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
                   </Col>
                   <Col span={12}>
                     <Form.Item name="employee" label="Nhân viên phụ trách">
-                      <Select 
+                      <Select
                         placeholder="Chọn nhân viên"
                         className="hover:border-blue-400"
                         dropdownStyle={{ padding: '8px' }}
@@ -429,9 +430,9 @@ const AddSenderModal: React.FC<AddSenderModalProps> = ({ open, onCancel, onSubmi
               </Space>
             </Card>
           </Col>
-          </Row>   
-        
-  
+        </Row>
+
+
       </Form>
     </Modal>
   );

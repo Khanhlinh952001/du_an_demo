@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import MainLayout from "@/layout/MainLayout";
 import { mockPickups } from "@/mocks/PickupMock";
-import { Input, Table, Button, DatePicker, Space, Card, Modal, message, Dropdown, Tabs, Calendar, Tag } from "antd";
+import { Input, Table, Button, DatePicker, Space, Card, Modal, message, Dropdown, Tabs, Calendar, Tag, Select } from "antd";
 import { PickupModal } from "@/components/modals/PickupModal";
 import type { PickupInfo } from "@/types/Pickup";
 import dayjs from 'dayjs';
@@ -31,6 +31,7 @@ function PickUpPage() {
     const [currentQrUrl, setCurrentQrUrl] = useState('');
     const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
     const [historyPickups, setHistoryPickups] = useState<PickupInfo[]>([]);
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     useEffect(() => {
         // Lọc các đơn pickup của ngày hôm nay
@@ -48,15 +49,32 @@ function PickUpPage() {
     };
 
     const handleSearch = (value: string) => {
-        if (!value.trim()) {
-            setSearchResults(mockPickups);
-            return;
+        let filtered = mockPickups;
+
+        // Lọc theo trạng thái trước
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(pickup => pickup.status === statusFilter);
         }
 
-        const filtered = mockPickups.filter(pickup =>
-            pickup.senderName?.toLowerCase().includes(value.toLowerCase()) ||
-            pickup.senderPhone?.includes(value)
-        );
+        // Sau đó lọc theo text search nếu có
+        if (value.trim()) {
+            filtered = filtered.filter(pickup =>
+                pickup.senderName?.toLowerCase().includes(value.toLowerCase()) ||
+                pickup.senderPhone?.includes(value)
+            );
+        }
+
+        setSearchResults(filtered);
+    };
+
+    const handleStatusChange = (value: string) => {
+        setStatusFilter(value);
+        let filtered = mockPickups;
+
+        if (value !== 'all') {
+            filtered = mockPickups.filter(pickup => pickup.status === value);
+        }
+
         setSearchResults(filtered);
     };
 
@@ -306,6 +324,17 @@ function PickUpPage() {
                                 onSearch={handleSearch}
                                 onChange={(e) => handleSearch(e.target.value)}
                                 style={{ width: 300 }}
+                            />
+                            <Select
+                                defaultValue="all"
+                                style={{ width: 200 }}
+                                onChange={handleStatusChange}
+                                options={[
+                                    { value: 'all', label: 'Tất cả trạng thái' },
+                                    { value: 'completed', label: 'Đã lấy hàng' },
+                                    { value: 'pending', label: 'Chưa lấy hàng' },
+                                    { value: 'cancelled', label: 'Đã hủy' }
+                                ]}
                             />
                             <RangePicker
                                 onChange={handleDateRangeChange}

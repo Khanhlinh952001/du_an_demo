@@ -1,4 +1,5 @@
 import { Order } from "@/types/Order";
+import { Delivery } from "@/types/Delivery";
 
 export const OrderMockData: Order[] = [
     {
@@ -150,4 +151,46 @@ export const OrderMockData: Order[] = [
       receiverRegion: 'HAN',
       price: 9000
     }
+];
+
+export const DeliveryMockData: Delivery[] = [
+    {
+        deliveryId: 'DEL001',
+        orderId: 'ORD001', // Relates to OrderMockData
+        deliveredBy: 'EMP001',
+        deliveredAt: new Date('2024-01-05'),
+        status: 'Delivered',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date(),
+        receiverSignature: 'signature1.png',
+        proofOfDelivery: ['proof1.png', 'proof2.png'],
+        attemptCount: 1,
+        failureReason: '',
+        sentDate: new Date('2024-01-01'),
+        packageCount: 2,
+        courierCompany: 'FastShip',
+        trackingNumber: 'TRK001',
+        notes: 'Handle with care',
+        assignedEmployee: 'EMP001'
+    },
+    {
+        deliveryId: 'DEL002',
+        orderId: 'ORD002', // Relates to OrderMockData
+        deliveredBy: 'EMP002',
+        deliveredAt: new Date('2024-02-10'),
+        status: 'Delivered',
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date(),
+        receiverSignature: 'signature2.png',
+        proofOfDelivery: ['proof3.png'],
+        attemptCount: 1,
+        failureReason: '',
+        sentDate: new Date('2024-02-01'),
+        packageCount: 3,
+        courierCompany: 'SeaExpress',
+        trackingNumber: 'TRK002',
+        notes: 'Fragile',
+        assignedEmployee: 'EMP002'
+    },
+    // Add more delivery mock data as needed
 ];

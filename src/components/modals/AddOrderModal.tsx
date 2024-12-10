@@ -670,7 +670,7 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
                   {searchResults.length > 0 && (
                     <Tabs.TabPane tab="Người gửi" key="senders">
                       <List
-                        size="small"
+                       size="small"
                         dataSource={searchResults}
                         renderItem={(item) => (
                           <List.Item

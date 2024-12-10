@@ -20,7 +20,6 @@ import {
 import Link from 'next/link';
 const { Header, Content, Sider } = Layout;
 
-import { ROLES ,RoleType} from '@/constants';
 import { usePathname} from 'next/navigation';
 
 const menuItems: MenuProps['items'] = [
@@ -190,13 +189,16 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
 
           <div className="flex items-center px-6">
-            <Button
+        <Link href={'/pages/profile'}>
+        <Button
               type="text" 
               icon={<InfoCircleOutlined />}
               className="text-sm mr-4"
             >
               Hồ sơ của tôi
             </Button>
+        </Link>
+          
             <Dropdown 
               menu={{ items: userMenuItems }} 
               trigger={['click']} 

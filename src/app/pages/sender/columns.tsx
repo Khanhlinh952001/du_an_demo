@@ -64,7 +64,7 @@ export const columns: ExtendedColumnType<Sender>[] = [
             return (
               <span key={index} className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
                 {getChannelIcon()}
-                {channel}
+              {channel}
               </span>
             );
           })}

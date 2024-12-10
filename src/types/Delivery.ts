@@ -10,9 +10,11 @@ export interface Delivery {
     proofOfDelivery?: string[];  // Ảnh chứng minh đã giao hàng
     attemptCount?: number;       // Số lần thử giao hàng
     failureReason?: string;      // Lý do giao hàng thất bại
-    location?: {                 // Vị trí giao hàng
-        latitude: number;
-        longitude: number;
-    };
+    sentDate: Date;           // Ngày gửi
+    packageCount: number;     // Số kiện
+    courierCompany: string;   // Hãng taekbae
+    trackingNumber: string;   // Mã taekbae
+    notes?: string;          // GHI CHÚ
+    assignedEmployee: string; // Nhân viên phụ trách
 }
-  
+ 

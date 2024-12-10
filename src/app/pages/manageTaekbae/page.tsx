@@ -1,7 +1,14 @@
+"use client"
+import MainLayout from "@/layout/MainLayout";
+import { Card } from "antd";
+
 function Page() {
-    return ( <div>
+    return ( <MainLayout>
+        <Card>
         skdghlksjghf
-    </div> );
+
+        </Card>
+    </MainLayout> );
 }
 
 export default Page;
