@@ -4,7 +4,7 @@ export const recipientMockData: Recipient[] = [
   {
     manageId: 'ADM001',
     handlerId: 'HDL001',
-    recipientId: 'RCP001',
+    recipientId: 'RCV001',
     name: 'Nguyễn Văn A',
     phone: '0901234567',
     address: '123 Đường ABC, Quận 1',

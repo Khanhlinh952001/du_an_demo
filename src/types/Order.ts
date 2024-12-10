@@ -8,19 +8,10 @@ export interface Order {
     
     // Sender Information
     senderId: string;         // Mã người gửi
-    senderName: string;       // Tên người gửi
-    senderPhone: string;      // SĐT người gửi
-    senderAddress: string;    // Địa chỉ người gửi
-    
+  
     // Receiver Information
-    receiverId: string;       // Mã người nhận
-    receiverName: string;     // Tên người nhận
-    receiverPhone: string;    // SĐT người nhận
-    receiverAddress: string;  // Địa chỉ người nhận
-    receiverRegion: string;    // SĐT người nhận
-    // Shipping Information
-    // origin: string;           // Nơi gửi (VN/KR)
-    // destination: string;      // Nơi nhận (VN/KR)
+    recipientId: string;       // Mã người nhận
+  
     serviceType: 'air' | 'sea'; // Loại dịch vụ
     shippingType: 'import' | 'export'; // Hình thức vận chuyển
     price:number,

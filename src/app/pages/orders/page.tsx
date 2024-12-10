@@ -5,18 +5,17 @@ import AddOrderModal from '@/components/modals/AddOrderModal';
 import { OrderMockData } from '@/mocks/OrderMock';
 import { Table, Button, Tag, Card, Modal, Tooltip, Input } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DownloadOutlined, UploadOutlined, PlusOutlined, DeleteOutlined, EditOutlined, PrinterOutlined, DollarOutlined } from '@ant-design/icons';
-import { exportToExcel, importFromExcel} from './excel'
+import { UploadOutlined, PlusOutlined, DeleteOutlined, EditOutlined, PrinterOutlined, DollarOutlined } from '@ant-design/icons';
+import { exportToExcel, importFromExcel } from './excel'
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 import ExportModal from '@/components/common/ExportModal';
 import { orderExportConfig, createExportData } from '@/configs/exportConfig';
-import { columns}  from './columns'
+import { columns } from './columns'
 import MainLayout from '@/layout/MainLayout';
 import AddMultiOrderModal from '@/components/modals/AddMuiltiOrders/AddMultiOrderModal';
 import PrintModal from '@/components/modals/PrintModal';
 import { PAYMENT_STATUS } from '@/constants/payments';
-
 export default function CreateSingleOrder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMultiModalOpen, setIsMultiModalOpen] = useState(false);
@@ -33,10 +32,24 @@ export default function CreateSingleOrder() {
   // Cu hình các cột quan trọng nhất
   const columnConfigs = [
     { key: 'orderId', label: 'Mã Đơn Hàng' },
-    { key: 'createdAt', label: 'Ngày Xuất' },
+    { key: 'senderId', label: 'Mã KH' },
     { key: 'senderName', label: 'Người Gửi' },
-    { key: 'receiverName', label: 'Người Nhận' },
-    { key: 'receiverRegion', label: 'Khu Vực' },
+    { key: 'senderPhone', label: 'SĐT Người Gửi' },
+    {
+      key: 'senderAddress', label: 'Dia chi gui'
+    },
+    {
+      key: 'receiverName', label: 'Nguoi nhan'
+    },
+    {
+      key: 'receiverPhone', label: 'SDT Nguoi nhan'
+    },
+    {
+      key: 'receiverRegion', label: 'Khu vuc '
+    },
+    {
+      key: 'receiverAddress', label: 'Dia chi nhan '
+    },
     { key: 'totalAmount', label: 'Thành Tiền' },
     { key: 'paymentStatus', label: 'Thanh Toán' },
     { key: 'note', label: 'Ghi Chú' },
@@ -45,10 +58,15 @@ export default function CreateSingleOrder() {
   // Mặc định hiển thị các cột quan trọng
   const defaultVisibleColumns = {
     orderId: true,
+    senderId: true,
     createdAt: true,
     senderName: true,
+    senderPhone: true,
+    senderAddress: true,
     receiverName: true,
+    receiverPhone: true,
     receiverRegion: true,
+    receiverAddress: true,
     totalAmount: true,
     paymentStatus: true,
     note: false,
@@ -62,7 +80,7 @@ export default function CreateSingleOrder() {
 
   const handleSubmit = (values: Order) => {
     if (editingOrder) {
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order.orderId === editingOrder.orderId ? values : order
       ));
       setEditingOrder(null);
@@ -138,13 +156,13 @@ export default function CreateSingleOrder() {
   // Add new payment handler
   const handlePayment = (record: Order) => {
     let inputAmount = 0;
-  
+
     Modal.confirm({
       title: 'Xác nhận thanh toán',
       content: (
         <div className="space-y-3">
           <p>Tổng tiền cần thanh toán: {record.totalAmount.toLocaleString()}đ</p>
-          <Input 
+          <Input
             type="number"
             placeholder="Nhập số tiền thanh toán"
             onChange={(e) => {
@@ -159,20 +177,20 @@ export default function CreateSingleOrder() {
       onOk: () => {
         const newPaidAmount = (record.totalAmount || 0) + inputAmount;
         const newRemainingAmount = record.totalAmount - newPaidAmount;
-        const newStatus = newPaidAmount >= record.totalAmount 
-          ? PAYMENT_STATUS.PAID 
-          : newPaidAmount > 0 
-            ? PAYMENT_STATUS.PARTIAL 
+        const newStatus = newPaidAmount >= record.totalAmount
+          ? PAYMENT_STATUS.PAID
+          : newPaidAmount > 0
+            ? PAYMENT_STATUS.PARTIAL
             : PAYMENT_STATUS.UNPAID;
-  
-        setOrders(orders.map(order => 
-          order.orderId === record.orderId 
-            ? { 
-                ...order,
-                paymentStatus: newStatus,
-                paidAmount: newPaidAmount,
-                remainingAmount: newRemainingAmount
-              }
+
+        setOrders(orders.map(order =>
+          order.orderId === record.orderId
+            ? {
+              ...order,
+              paymentStatus: newStatus,
+              paidAmount: newPaidAmount,
+              remainingAmount: newRemainingAmount
+            }
             : order
         ));
       }
@@ -218,8 +236,8 @@ export default function CreateSingleOrder() {
               setIsDetailsModalOpen(true);
             }}
             className={
-              printStatuses[record.orderId] === 'Đã in' 
-                ? 'text-gray-300 pointer-events-none' 
+              printStatuses[record.orderId] === 'Đã in'
+                ? 'text-gray-300 pointer-events-none'
                 : 'text-gray-500 hover:text-gray-600'
             }
           />
@@ -270,7 +288,7 @@ export default function CreateSingleOrder() {
       newOrders.unshift(selectedOrder);
       setOrders(newOrders);
       setLastClickedOrder(record.orderId);
-      
+
       // Reset màu nền sau 2 giây
       setTimeout(() => {
         setLastClickedOrder(null);
@@ -296,7 +314,7 @@ export default function CreateSingleOrder() {
       <Card className="shadow-sm">
         <div className="flex justify-between items-center mb-6">
           <div>
-           <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-800">
               Danh sách đơn hàng
             </h1>
             <p className="text-gray-500 mt-1">Quản lý và theo dõi các đơn hàng</p>
@@ -323,14 +341,14 @@ export default function CreateSingleOrder() {
               onChange={handleUpdateFromExcel}
               className="hidden"
             />
-            <Button 
+            <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsMultiModalOpen(true)}
             >
               Tạo nhiều đơn
             </Button>
-            <Button 
+            <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsModalOpen(true)}
@@ -364,13 +382,13 @@ export default function CreateSingleOrder() {
           </div>
 
           {/* Existing column visibility control */}
-          
+
         </div>
 
         {/* Thêm bulk actions */}
         {renderBulkActions()}
 
-        <Table 
+        <Table
           rowSelection={rowSelection}
           columns={updatedFilteredColumns}
           dataSource={filteredOrders}

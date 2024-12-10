@@ -13,6 +13,9 @@ import { columns as airColumns } from "./columns";
 import MainLayout from '@/layout/MainLayout';
 import type { ColumnType, ColumnGroupType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import { getCustomerForOrder, getRecipientForOrder } from '@/utils/orderHelpers';
+import { Sender } from '@/types/Sender';
+import { Recipient } from '@/types/Recipient';
 
 const { RangePicker } = DatePicker;
 const { Search } = Input;
@@ -25,29 +28,51 @@ export default function ManageOrders() {
     const [customerIdFilter, setCustomerIdFilter] = useState("");
     const [activeTab, setActiveTab] = useState<'sea' | 'air'>('sea');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [senders, setSenders] = useState<Sender[]>([]);
+    const [recipients, setRecipients] = useState<Recipient[]>([]);
 
     // Column configurations
     const columnConfigs = [
         { key: 'orderId', label: 'Mã Đơn Hàng' },
-        { key: 'createdAt', label: 'Ngày Xuất' },
+        { key: 'senderId', label: 'Mã KH' },
         { key: 'senderName', label: 'Người Gửi' },
-        { key: 'receiverName', label: 'Người Nhận' },
-        { key: 'receiverRegion', label: 'Khu Vực' },
+        { key: 'senderPhone', label: 'SĐT Người Gửi' },
+        {
+          key: 'senderAddress', label: 'Dia chi gui'
+        },
+        {
+          key: 'receiverName', label: 'Nguoi nhan'
+        },
+        {
+          key: 'receiverPhone', label: 'SDT Nguoi nhan'
+        },
+        {
+          key: 'receiverRegion', label: 'Khu vuc '
+        },
+        {
+          key: 'receiverAddress', label: 'Dia chi nhan '
+        },
         { key: 'totalAmount', label: 'Thành Tiền' },
-        { key: 'status', label: 'Trạng Thái' },
+        { key: 'paymentStatus', label: 'Thanh Toán' },
         { key: 'note', label: 'Ghi Chú' },
-    ];
-
-    const defaultVisibleColumns = {
+      ];
+    
+      // Mặc định hiển thị các cột quan trọng
+      const defaultVisibleColumns = {
         orderId: true,
+        senderId: true,
         createdAt: true,
         senderName: true,
+        senderPhone: true,
+        senderAddress: true,
         receiverName: true,
+        receiverPhone: true,
         receiverRegion: true,
+        receiverAddress: true,
         totalAmount: true,
-        status: true,
+        paymentStatus: true,
         note: false,
-    };
+      };
 
     const {
         visibleColumns,
@@ -66,18 +91,27 @@ export default function ManageOrders() {
             return true;
         })
         .filter(order => {
-            // Lọc theo từ khóa (ID hoặc tên)
+            // Cải thiện tìm kiếm bằng cách sử dụng thông tin từ sender
             if (filter) {
-                return order.senderName.toLowerCase().includes(filter.toLowerCase()) || 
-                       order.orderId.toLowerCase().includes(filter.toLowerCase());
+                const sender = getCustomerForOrder(senders, order.senderId);
+                return (
+                    sender?.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    order.orderId.toLowerCase().includes(filter.toLowerCase()) 
+                    
+                  
+                );
             }
             return true;
         })
         .filter(order => {
-            // Lọc theo số điện thoại
+            // Cải thiện tìm kiếm số điện thoại bằng cách kiểm tra cả người gửi và người nhận
             if (phoneFilter) {
-                return order.senderPhone.includes(phoneFilter) || 
-                       order.receiverPhone.includes(phoneFilter);
+                const sender = getCustomerForOrder(senders, order.senderId);
+                const recipient = getRecipientForOrder(recipients, order.recipientId);
+                return (
+                    sender?.phone.includes(phoneFilter) ||
+                    recipient?.phone.includes(phoneFilter)
+                );
             }
             return true;
         })
@@ -89,9 +123,13 @@ export default function ManageOrders() {
             return true;
         })
         .filter(order => {
-            // Lọc theo mã khách hàng
+            // Cải thiện tìm kiếm mã khách hàng
             if (customerIdFilter) {
-                return order.orderId.includes(customerIdFilter);
+                const sender = getCustomerForOrder(senders, order.senderId);
+                return (
+                    order.orderId.includes(customerIdFilter) ||
+                    sender?.senderId.includes(customerIdFilter)
+                );
             }
             return true;
         });

@@ -4,100 +4,75 @@ import type { ExtendedColumnType } from "../../../components/recipients/columns"
 import { CalendarOutlined, IdcardOutlined, PhoneOutlined, HomeOutlined, UserOutlined, EnvironmentOutlined, InboxOutlined, DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { formatDate } from "@/utils/format";
 import { PAYMENT_STATUS, PaymentStatusType } from '@/constants/payments';
+import { getCustomerForOrder, getRecipientForOrder } from "@/utils/orderHelpers";
+import { senderMockData } from "@/mocks/senderMockData";
+import { recipientMockData } from "@/mocks/recipientMockData";
 
 export const columns: ExtendedColumnType<Order>[] = [
   {
     title: <><CalendarOutlined /> Ngày Tạo</>,
     dataIndex: 'createdAt',
     key: 'createdAt',
-    width: 80,
+    width: 120,
     render: (date: Date) => formatDate(date),
   },
   {
     title: <><IdcardOutlined /> Mã Đơn</>,
     dataIndex: 'orderId',
     key: 'orderId',
-    width: 80,
+    width: 120,
   },
   {
     title: <><UserOutlined /> Người Gửi</>,
-    dataIndex: 'senderName',
+    dataIndex: 'senderId',
     key: 'senderName',
-    width: 100,
-    render: (_, record) => (
-      <Tooltip 
-        title={
-          <div className="p-1">
-            <p><strong>Tên:</strong> {record.senderName}</p>
-            <p><strong>SĐT:</strong> {record.senderPhone}</p>
-            <p><strong>Địa chỉ:</strong> {record.senderAddress}</p>
-          </div>
-        }
-        placement="topLeft"
-      >
-        <div className="cursor-pointer">
-          <div className="font-medium">{record.senderName}</div>
-          <div className="text-gray-500 text-sm">{record.senderPhone}</div>
-        </div>
-      </Tooltip>
-    ),
+    width: 200,
+    render: (senderId: string) => getCustomerForOrder(senderMockData, senderId)?.name || '',
   },
   {
     title: <><PhoneOutlined /> SĐT Người Gửi</>,
-    dataIndex: 'senderPhone',
+    dataIndex: 'senderId',
     key: 'senderPhone',
-    width: 100,
+
+    width: 120,
+    render: (senderId: string) => getCustomerForOrder(senderMockData, senderId)?.phone || '',
   },
   {
-    title: <><HomeOutlined /> Địa Chỉ Người Gửi</>,
-    dataIndex: 'senderAddress',
+    title: <><PhoneOutlined /> Dia chi Gửi</>,
+    dataIndex: 'senderId',
     key: 'senderAddress',
-    width: 200,
+
+    width: 120,
+    render: (senderId: string) => getCustomerForOrder(senderMockData, senderId)?.address || '',
   },
+  
   {
     title: <><UserOutlined /> Người Nhận</>,
-    dataIndex: 'receiverName',
+    dataIndex: 'recipientId',
     key: 'receiverName',
-    width: 100,
-    render: (_, record) => (
-      <Tooltip 
-        title={
-          <div className="p-1">
-            <p><strong>Tên:</strong> {record.receiverName}</p>
-            <p><strong>SĐT:</strong> {record.receiverPhone}</p>
-            <p><strong>Địa chỉ:</strong> {record.receiverAddress}</p>
-            <p><strong>Khu vực:</strong> {record.receiverRegion}</p>
-          </div>
-        }
-        placement="topLeft"
-      >
-        <div className="cursor-pointer">
-          <div className="font-medium">{record.receiverName}</div>
-          <div className="text-gray-500 text-sm">{record.receiverPhone}</div>
-        </div>
-      </Tooltip>
-    ),
+    width: 200,
+    render: (recipientId: string) => getRecipientForOrder(recipientMockData, recipientId)?.name || '',
   },
   {
-    title: <><PhoneOutlined /> SĐT Người Nhận</>,
-    dataIndex: 'receiverPhone',
+    title: <><UserOutlined />SDT Người Nhận</>,
+    dataIndex: 'recipientId',
     key: 'receiverPhone',
-    width: 150,
+    width: 200,
+    render: (recipientId: string) => getRecipientForOrder(recipientMockData, recipientId)?.phone || '',
   },
   {
-    title: <><HomeOutlined /> Địa Chỉ Người Nhận</>,
-    dataIndex: 'receiverAddress',
+    title: <><UserOutlined />Khu vực</>,
+    dataIndex: 'recipientId',
+    key: 'receiverRegion',
+    width: 200,
+    render: (recipientId: string) => getRecipientForOrder(recipientMockData, recipientId)?.region || '',
+  },
+  {
+    title: <><UserOutlined />Địa chỉ Người Nhận</>,
+    dataIndex: 'recipientId',
     key: 'receiverAddress',
     width: 200,
-  },
-  {
-    title: <><EnvironmentOutlined /> Khu Vực</>,
-    dataIndex: 'receiverRegion',
-    key: 'receiverRegion',
-    width: 60,
-    render: (region: string) => (
-      <Tag color="blue">{region}</Tag>
-    ),
+    render: (recipientId: string) => getRecipientForOrder(recipientMockData, recipientId)?.address || '',
   },
   {
     title: <><InboxOutlined /> Số Kiện</>,
@@ -136,7 +111,7 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: <><DollarOutlined /> Tổng Tiền</>,
     dataIndex: 'totalAmount',
     key: 'totalAmount',
-    width: 80,
+    width: 120,
     render: (amount: number) => (
       <span className="font-medium text-green-600">
         {amount?.toLocaleString('vi-VN')} VNĐ
@@ -147,7 +122,7 @@ export const columns: ExtendedColumnType<Order>[] = [
     title: 'Trạng Thái',
     dataIndex: 'status',
     key: 'status',
-    width: 60,
+    width: 120,
     render: (status: string) => (
       <Tag color={
         status === 'Delivered' ? 'success' :

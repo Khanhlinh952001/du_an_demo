@@ -7,13 +7,9 @@ export const OrderMockData: Order[] = [
       manageId: 'MNG001',
       handlerId: 'HDL001',
       senderId: 'SND001',
-      senderName: 'Nguyen Van A',
-      senderPhone: '0123456789',
-      senderAddress: '123 Đường ABC, Quận 1, TP. Hồ Chí Minh',
-      receiverId: 'RCV001',
-      receiverName: 'Tran Thi B',
-      receiverPhone: '0987654321',
-      receiverAddress: '456 Đường XYZ, Quận 2, TP. Hà Nội',
+   
+      recipientId: 'RCV001',
+  
       
       serviceType: 'air',
       shippingType: 'export',
@@ -29,7 +25,6 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'PAID',
       totalAmount: 1500000,
       note: 'Ghi chú mẫu',
-      receiverRegion: 'SGN' ,
       
       price:8000   
     },
@@ -37,14 +32,8 @@ export const OrderMockData: Order[] = [
       orderId: 'ORD002',
       manageId: 'MNG002',
       handlerId: 'HDL002',
-      senderId: 'SND002',
-      senderName: 'Le Thi C',
-      senderPhone: '0123456788',
-      senderAddress: '789 Đường DEF, Quận 7, TP. Hồ Chí Minh',
-      receiverId: 'RCV002',
-      receiverName: 'Pham Van D',
-      receiverPhone: '0987654322',
-      receiverAddress: '321 Đường KLM, Quận Cầu Giấy, TP. Hà Nội',
+      senderId: 'SND001',
+      recipientId: 'RCV001',
     
       serviceType: 'sea',
       shippingType: 'import',
@@ -60,7 +49,6 @@ export const OrderMockData: Order[] = [
       paymentStatus: 'UNPAID',
       totalAmount: 2500000,
       note: 'Hàng dễ vỡ',
-      receiverRegion: 'HAN',
       price: 12000
     },
     {
@@ -68,13 +56,9 @@ export const OrderMockData: Order[] = [
       manageId: 'MNG003',
       handlerId: 'HDL003',
       senderId: 'SND003',
-      senderName: 'Hoang Van E',
-      senderPhone: '0123456787',
-      senderAddress: '246 Đường GHI, Quận 3, TP. Hồ Chí Minh',
+  
       receiverId: 'RCV003',
-      receiverName: 'Vu Thi F',
-      receiverPhone: '0987654323',
-      receiverAddress: '135 Đường NOP, Quận Hai Bà Trưng, TP. Hà Nội',
+     
       
       serviceType: 'air',
       shippingType: 'import',
@@ -98,13 +82,7 @@ export const OrderMockData: Order[] = [
       manageId: 'MNG004',
       handlerId: 'HDL004',
       senderId: 'SND004',
-      senderName: 'Tran Van G',
-      senderPhone: '0123456786',
-      senderAddress: '135 Đường JKL, Quận 5, TP. Hồ Chí Minh',
       receiverId: 'RCV004',
-      receiverName: 'Nguyen Thi H',
-      receiverPhone: '0987654324',
-      receiverAddress: '246 Đường QRS, Quận Long Biên, TP. Hà Nội',
       serviceType: 'air',
       shippingType: 'export',
       itemType: 'Food',

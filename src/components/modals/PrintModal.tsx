@@ -154,7 +154,7 @@ const printFn = useReactToPrint({
               </div>
 
               {/* Main Content */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <Descriptions bordered column={2} size="small">
                   <Descriptions.Item label="Mã đơn hàng" span={2}>{order.orderId}</Descriptions.Item>
 
@@ -181,7 +181,7 @@ const printFn = useReactToPrint({
                     {order.note || 'Không có ghi chú'}
                   </Descriptions.Item>
                 </Descriptions>
-              </div>
+              </div> */}
 
               {/* Footer */}
               <div className="absolute bottom-0 left-0 right-0 border-t border-red-500/80 p-2 text-xs bg-red-50">

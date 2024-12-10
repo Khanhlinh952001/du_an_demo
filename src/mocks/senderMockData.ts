@@ -5,7 +5,7 @@ export const senderMockData: Sender[] = [
     manageId: "ADMIN001",
     handlerId: "HDL001",
     joinDate: "2024-03-15",
-    senderId: "VHMVC0001",
+    senderId: "SND001",
     name: "Nguyễn Văn A",
     phone: "0901234567",
     facebook: "fb.com/nguyenvana",
