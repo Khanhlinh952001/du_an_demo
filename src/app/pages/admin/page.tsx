@@ -1,6 +1,12 @@
 "use client"
 import MainLayout from "@/layout/MainLayout";
 import { Card, Tabs } from "antd";
+import EmailSetting from "./Email";
+import Price from "./Price";
+import SampleContent from "./SampleContent";
+import Employee from "./Employee";
+import Decentralization from "./Decentralization";
+import SystemNotifications from "./SystemNotifications";
 
 function AdminPage() {
     const onChange = (key: string) => {
@@ -11,32 +17,32 @@ function AdminPage() {
         {
             key: '1',
             label: 'Cấu hình email',
-            children: <div>Nội dung cho Cấu hình email</div>,
+            children: <EmailSetting />,
         },
         {
             key: '2',
             label: 'Thiết lập đơn giá',
-            children: <div>Nội dung cho Thiết lập đơn giá</div>,
+            children: <Price />,
         },
         {
             key: '3',
             label: 'Nội dung mẫu',
-            children: <div>Nội dung cho Nội dung mẫu</div>,
+            children: <SampleContent />,
         },
         {
             key: '4',
             label: 'Nhân sự',
-            children: <div>Nội dung cho Nhân sự</div>,
+            children: <Employee />,
         },
         {
             key: '5',
             label: 'Phân quyền',
-            children: <div>Nội dung cho Phân quyền</div>,
+            children: <Decentralization />,
         },
         {
             key: '6',
             label: 'Thông báo hệ thống',
-            children: <div>Nội dung cho Thông báo hệ thống</div>,
+            children: <SystemNotifications />,
         },
     ];
 

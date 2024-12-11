@@ -1,10 +1,11 @@
-import { Company } from "@/types/Company";
+
+import type { CompanyInfo } from '@/types/Company';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, Space } from "antd";
 
 interface ColumnActionsProps {
-  handleEdit: (record: Company) => void;
-  handleDelete: (record: Company) => void;
+    handleEdit: (record: CompanyInfo) => void;
+    handleDelete: (record: CompanyInfo) => void;
 }
 
 export const getColumns = ({ handleEdit, handleDelete }: ColumnActionsProps) => [
@@ -12,7 +13,7 @@ export const getColumns = ({ handleEdit, handleDelete }: ColumnActionsProps) => 
       title: 'Tên công ty',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a: Company, b: Company) => a.name.localeCompare(b.name),
+        sorter: (a: CompanyInfo, b: CompanyInfo) => a.companyName.localeCompare(b.companyName),
     },
     {
       title: 'Mã số thuế',
@@ -54,7 +55,7 @@ export const getColumns = ({ handleEdit, handleDelete }: ColumnActionsProps) => 
     {
       title: 'Thao tác',
       key: 'actions',
-      render: (_: any, record: Company) => (
+      render: (_: any, record: CompanyInfo) => (
         <Space>
           <Button
             icon={<EditOutlined />}

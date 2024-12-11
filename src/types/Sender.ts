@@ -14,9 +14,8 @@ export interface Sender {
     sgnPrice?: number;        // Đơn giá từ SGN (Sài Gòn)
     hanPrice?: number;        // Đơn giá từ HAN (Hà Nội)
     seaPrice?: number;        // Đơn giá từ SEA 
-    vnToKrPrice?: number;     // Đơn giá bay Việt-Hàn
-    priceInKRW?: number;      // Đơn giá từ KRW (Hàn Quốc)
-    priceInVND?: number;      // Đơn giá từ VND (Việt Nam)
+    vnToKrPriceInKRW?: number;      // Đơn giá từ KRW (Hàn Quốc)
+    vnToKrPriceInVND?: number;      // Đơn giá từ VND (Việt Nam)
     exchangeRate?: number;    // Tỷ giá
     serviceFee?: string;      // Công mua
     rating?: string;          // Xếp loại

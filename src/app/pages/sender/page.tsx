@@ -112,7 +112,7 @@ export default function SenderPage() {
     if (dateRange[0] && dateRange[1]) {
       const startDate = dateRange[0].startOf('day').valueOf();
       const endDate = dateRange[1].endOf('day').valueOf();
-      
+
       filtered = filtered.filter(sender => {
         const senderDate = new Date(sender.joinDate).valueOf();
         return senderDate >= startDate && senderDate <= endDate;
@@ -133,27 +133,26 @@ export default function SenderPage() {
       key: 'actions',
       title: 'Hành động',
       render: (_: unknown, record: Sender) => (
-        <div className="flex ">
+        <div className="flex">
           <Button
-            icon={<EditOutlined />}
+            icon={<EditOutlined style={{ fontSize: '16px' }} />}
             onClick={() => handleEdit(record)}
-            style={{ marginRight: 8 }}
+            style={{ marginRight: 8, fontSize: '14px' }}
           />
           <Button
-            icon={<DeleteOutlined />}
+            icon={<DeleteOutlined style={{ fontSize: '16px' }} />}
             onClick={() => handleDelete(record)}
             danger
-            style={{ marginRight: 8 }}
+            style={{ marginRight: 8, fontSize: '14px' }}
           />
-           <Button
-            icon={<UsergroupAddOutlined />}
+          <Button
+            icon={<UsergroupAddOutlined style={{ fontSize: '16px' }} />}
             onClick={() => {
               setSelectedSenderId(record.senderId);
               setIsRecipientModalOpen(true);
             }}
+            style={{ fontSize: '14px' }}
           />
-
-
         </div>
       ),
     },
@@ -218,7 +217,7 @@ export default function SenderPage() {
             updatedAt: new Date().toISOString(),
             // Chỉ cập nhật các trường có giá trị
             rating: values.rating || sender.rating,
-           
+
           };
         }
         return sender;
@@ -262,25 +261,25 @@ export default function SenderPage() {
         layout="vertical"
       >
         <Form.Item name="rating" label="Xếp loại">
-                      <Select 
-                        placeholder="Chọn xếp loại"
-                        className="hover:border-blue-400"
-                        dropdownStyle={{ padding: '8px' }}
-                      >
-                        <Select.Option value="VIP">
-                          <Tag color="gold">VIP</Tag>
-                        </Select.Option>
-                        <Select.Option value="Thường">
-                          <Tag color="blue">Thường</Tag>
-                        </Select.Option>
-                        <Select.Option value="Tiềm năng">
-                          <Tag color="green">Tiềm năng</Tag>
-                        </Select.Option>
-                        <Select.Option value="Xấu">
-                          <Tag color="red">Xấu</Tag>
-                        </Select.Option>
-                      </Select>
-                    </Form.Item>
+          <Select
+            placeholder="Chọn xếp loại"
+            className="hover:border-blue-400"
+            dropdownStyle={{ padding: '8px' }}
+          >
+            <Select.Option value="VIP">
+              <Tag color="gold">VIP</Tag>
+            </Select.Option>
+            <Select.Option value="Thường">
+              <Tag color="blue">Thường</Tag>
+            </Select.Option>
+            <Select.Option value="Tiềm năng">
+              <Tag color="green">Tiềm năng</Tag>
+            </Select.Option>
+            <Select.Option value="Xấu">
+              <Tag color="red">Xấu</Tag>
+            </Select.Option>
+          </Select>
+        </Form.Item>
         <Form.Item name="staff" label="Nhân viên">
           <Select>
             <Select.Option value="staff1">Nhân viên 1</Select.Option>
@@ -321,7 +320,7 @@ export default function SenderPage() {
 
         {/* Search and Filter Section */}
         <div className="flex flex-wrap gap-4 items-center">
-          <DatePicker.RangePicker 
+          <DatePicker.RangePicker
             onChange={handleDateRangeChange}
             placeholder={['Từ ngày', 'Đến ngày']}
             style={{ width: 280 }}
@@ -361,15 +360,15 @@ export default function SenderPage() {
               />
             </label>
             <ColumnVisibilityControl
-          columns={columnConfigs}
-          visibleColumns={visibleColumns}
-          onChange={handleColumnVisibilityChange}
-        />
+              columns={columnConfigs}
+              visibleColumns={visibleColumns}
+              onChange={handleColumnVisibilityChange}
+            />
           </div>
         </div>
 
         {/* Column Visibility Control */}
-       
+
 
         {/* Table */}
         <Table
@@ -388,7 +387,7 @@ export default function SenderPage() {
             showSizeChanger: true,
             showTotal: (total) => `Tổng số ${total} người gửi`,
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1500 }}
         />
 
         {/* Add BulkEditModal */}
@@ -403,15 +402,15 @@ export default function SenderPage() {
           mode={modalMode}
         />
 
-<Modal
-      title="Danh sách người nhận"
-      open={isRecipientModalOpen}
-      onCancel={() => setIsRecipientModalOpen(false)}
-      width={1200}
-      footer={null}
-    >
-      <RecipientList senderId={selectedSenderId || ''} />
-    </Modal>
+        <Modal
+          title="Danh sách người nhận"
+          open={isRecipientModalOpen}
+          onCancel={() => setIsRecipientModalOpen(false)}
+          width={1200}
+          footer={null}
+        >
+          <RecipientList senderId={selectedSenderId || ''} />
+        </Modal>
 
         <ExportModal
           open={isExportModalOpen}

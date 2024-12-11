@@ -1,4 +1,3 @@
-import { ColumnsType } from 'antd/es/table';
 import { Order } from '@/types/Order';
 import { ExtendedColumnType } from '../../../components/recipients/columns';
 import { formatDate } from '@/utils/format';

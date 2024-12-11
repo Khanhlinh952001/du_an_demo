@@ -5,11 +5,9 @@ import MainLayout from '@/layout/MainLayout';
 import { 
   DollarOutlined, 
   UserOutlined, 
-  RiseOutlined, 
   ShoppingCartOutlined,
   CreditCardOutlined,
   TeamOutlined,
-  ShoppingOutlined,
   DownloadOutlined,
   FilterOutlined
 } from '@ant-design/icons';

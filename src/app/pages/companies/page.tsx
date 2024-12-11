@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Button, Space, Input } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
-import { Company } from '@/types/Company';
+import { CompanyInfo } from '@/types/Company';
 import MainLayout from '@/layout/MainLayout';
 import { CompanyMockData } from '@/mocks/CompanyMockData';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
@@ -12,14 +12,14 @@ import { getColumns } from './columns';
 const { Search } = Input;
 
 export default function CompaniesPage() {
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companies, setCompanies] = useState<CompanyInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleEdit = (company: Company) => {
+  const handleEdit = (company: CompanyInfo) => {
     console.log('Edit company:', company);
   };
 
-  const handleDelete = (company: Company) => {
+  const handleDelete = (company: CompanyInfo) => {
     console.log('Delete company:', company);
   };
 

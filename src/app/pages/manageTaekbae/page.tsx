@@ -4,8 +4,9 @@ import { Card } from "antd";
 
 function Page() {
     return ( <MainLayout>
-        <Card>
-        skdghlksjghf
+        <Card title = "Quan ly taekbae">
+            
+       
 
         </Card>
     </MainLayout> );

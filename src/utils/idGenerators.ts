@@ -141,3 +141,11 @@ export const generateVietnamToKoreaCustomerId = (): string => {
 export const generateSeaTransportCustomerId = (): string => {
   return generateIdWithPrefix('VHMVCS', 6);
 };
+
+/**
+ * Tạo ID quản lý (MNG + 6 số)
+ * VD: MNG001234
+ */
+export const generateManageId = (): string => {
+  return generateIdWithPrefix('MNG', 6);
+};

@@ -14,16 +14,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 
-// Enable offline persistence
-enableIndexedDbPersistence(db, {
-  forceOwnership: false // Enables multi-tab support
-}).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.error('Persistence failed: Multiple tabs open. Persistence can only be enabled in one tab at a time.');
-  } else if (err.code === 'unimplemented') {
-    console.error('Persistence failed: Browser does not support required features');
-  }
-});
+// // Enable offline persistence
+// enableIndexedDbPersistence(firestore, {
+//   forceOwnership: false // Enables multi-tab support
+// }).catch((err) => {
+//   if (err.code === 'failed-precondition') {
+//     console.error('Persistence failed: Multiple tabs open. Persistence can only be enabled in one tab at a time.');
+//   } else if (err.code === 'unimplemented') {
+//     console.error('Persistence failed: Browser does not support required features');
+//   }
+// });
