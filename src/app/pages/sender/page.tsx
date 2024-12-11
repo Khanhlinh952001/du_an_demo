@@ -36,25 +36,26 @@ export default function SenderPage() {
   const columnConfigs = [
     { key: 'senderId', label: 'Mã KH' },
     { key: 'name', label: 'Tên KH' },
-    { key: 'contact', label: 'Thông tin liên hệ' },
+    { key: 'phone', label: 'SĐT' },
+    { key: 'address', label: 'Địa chỉ' },
     { key: 'social', label: 'Mạng xã hội' },
     { key: 'contactChannels', label: 'Kênh liên hệ' },
     { key: 'orderInfo', label: 'Thông tin đơn hàng' },
+    { key: 'priceInfo', label: 'Đơn hàng' },
     { key: 'dates', label: 'Thời gian' },
-    { key: 'phone', label: 'SĐT' },
     { key: 'management', label: 'Quản lý' },
   ];
 
   const defaultVisibleColumns = {
     senderId: true,
     name: true,
-
-    contact: true,
+    phone: true,
+    address: true,
     social: true,
+    priceInfo: true,
     contactChannels: true,
     orderInfo: true,
     dates: true,
-    phone: true,
     management: false,
   };
 
@@ -387,6 +388,7 @@ export default function SenderPage() {
             showSizeChanger: true,
             showTotal: (total) => `Tổng số ${total} người gửi`,
           }}
+          scroll={{ x: 1200 }}
         />
 
         {/* Add BulkEditModal */}

@@ -54,9 +54,7 @@ export const columns: ExtendedColumnType<Order>[] = [
       showTitle: false,
     },
     render: (senderId: string) => (
-      <Tooltip title={getCustomerForOrder(senderMockData, senderId)?.address || ''}>
         <span>{getCustomerForOrder(senderMockData, senderId)?.address || ''}</span>
-      </Tooltip>
     ),
   },
   {

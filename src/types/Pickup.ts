@@ -3,7 +3,7 @@ export interface PickupInfo {
     pickupId: string;
     
     // Định danh của người gửi hàng (không bắt buộc)
-    senderId?: string;
+    senderId: string;
     
     // Định danh của nhân viên xử lý yêu cầu lấy hàng
     handlerId: string;

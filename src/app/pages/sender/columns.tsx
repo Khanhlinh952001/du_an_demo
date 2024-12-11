@@ -13,7 +13,8 @@ export const columns: ExtendedColumnType<Sender>[] = [
       title: 'Mã KH',
       dataIndex: 'senderId',
       key: 'senderId',
-      width: '8%',
+      width: 100,
+      ellipsis: true,
       className: 'font-medium text-gray-700 whitespace-nowrap',
     },
     {
@@ -29,20 +30,24 @@ export const columns: ExtendedColumnType<Sender>[] = [
       ),
     },
     {
-      title: 'Thông tin liên hệ',
-      key: 'contact',
+      title: 'Số điện thoại',
+      key: 'phone',
       width: '15%',
       render: (record: Sender) => (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded transition-colors">
-            <PhoneOutlined className="text-blue-500" />
-            <span className="text-gray-700">{record.phone || '-'}</span>
-          </div>
-          <div className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded transition-colors">
-            <HomeOutlined className="text-green-500" />
-            <span className="text-gray-600 truncate max-w-[200px]">{record.address || '-'}</span>
-          </div>
+        <div className="flex flex-col gap-1 py-1 text-xs">
+        <div className="flex items-center gap-2">
+          <PhoneOutlined />
+          <span>
+            {record.phone || 'Không có số điện thoại'}
+          </span>
         </div>
+        <div className="flex items-center gap-2">
+          <HomeOutlined />
+          <span className="truncate">
+            {record.address || 'Không có địa chỉ'}
+          </span>
+        </div>
+      </div>
       ),
     },
     {
@@ -62,9 +67,9 @@ export const columns: ExtendedColumnType<Sender>[] = [
             };
 
             return (
-              <span key={index} className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
+              <span key={index} className="flex justify-center items-center">
                 {getChannelIcon()}
-              {channel}
+              
               </span>
             );
           })}
@@ -76,20 +81,20 @@ export const columns: ExtendedColumnType<Sender>[] = [
       key: 'social',
       width: '10%',
       render: (record: Sender) => (
-        <div className="flex items-center gap-2 py-1">
+        <div className="flex items-center space-x-2 bg-gray-50 p-1 rounded-lg">
           {record.facebook && (
             <a href={record.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">
-              <SiFacebook className="text-xl" />
+              <SiFacebook className="text-sm" />
             </a>
           )}
           {record.zalo && (
             <a href={record.zalo} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
-              <SiZalo className="text-xl" />
+              <SiZalo className="text-sm" />
             </a>
           )}
           {record.kakaoTalk && (
             <a href={record.kakaoTalk} target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:text-yellow-600">
-              <SiKakaotalk className="text-xl" />
+              <SiKakaotalk className="text-sm" />
             </a>
           )}
         </div>
@@ -106,6 +111,17 @@ export const columns: ExtendedColumnType<Sender>[] = [
             <ShoppingOutlined />
             <span className="font-medium">{record.orderCount || 0}</span>
           </div>
+          
+        </div>
+      ),
+    },
+    {
+      title: 'Đơn giá',
+      key: 'priceInfo',
+      width: '12%',
+      render: (record: Sender) => (
+        <div className="flex items-center gap-2 justify-center">
+          
           <div className="flex items-center gap-1">
             <DollarOutlined />
             <span className="font-medium text-gray-700">

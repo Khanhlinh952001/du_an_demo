@@ -22,6 +22,11 @@ import { PaymentMockData } from '@/mocks/PaymentMockData';
 const { Search } = Input;
 import QuotationPDF from '@/components/QuotationPDF';
 import { getPaymentForOrder } from '@/utils/orderHelpers';
+import * as XLSX from 'xlsx';
+import { getCustomerForOrder } from '@/utils/orderHelpers';
+import { senderMockData } from '@/mocks/senderMockData';
+import { formatDate } from '@/utils/format';
+
 export default function DebtPage() {
   const [searchText, setSearchText] = useState('');
   const [selectedRows, setSelectedRows] = useState<Order[]>([]);
@@ -37,7 +42,7 @@ export default function DebtPage() {
   const debtExportConfig = [
     { key: 'customerCode', label: 'Mã khách hàng' },
     { key: 'customerName', label: 'Tên khách hàng' },
-    { key: 'phone', label: 'Số điện thoại' },
+    { key: 'contactInfo', label: 'Số điện thoại' },
     { key: 'email', label: 'Email' },
     { key: 'totalDebt', label: 'Tổng nợ' },
     { key: 'paidAmount', label: 'Đã thanh toán' },
@@ -49,16 +54,58 @@ export default function DebtPage() {
     UNPAID: { color: 'red', text: 'Chưa thanh toán' },
     PARTIAL_PAID: { color: 'orange', text: 'Thanh toán một phần' },
     PAID: { color: 'green', text: 'Đã thanh toán' },
-    // PENDING: { color: 'blue', text: 'Đang xử lý' },
-    // REFUNDED: { color: 'purple', text: 'Đã hoàn tiền' }
+    PENDING: { color: 'blue', text: 'Đang xử lý' },
+    REFUNDED: { color: 'purple', text: 'Đã hoàn tiền' }
   };
 
   const handleSearch = (value: string) => {
     // Implement search logic here
   };
 
-  const handleExport = async () => {
-    // Implement export logic here
+  const handleExport = () => {
+    // Nếu có hàng được chọn thì xuất những hàng đó, không thì xuất tất cả
+    const dataToExport = selectedRows.length > 0 ? selectedRows : data;
+    
+    const exportData = dataToExport.map(order => {
+      const sender = getCustomerForOrder(senderMockData, order.senderId);
+      const payment = getPaymentForOrder(PaymentMockData, order.paymentId || '');
+      
+      return {
+        'Ngày Xuất': formatDate(order.createdAt),
+        'Mã Đơn': order.orderId,
+        'Người Gửi': sender?.name || '',
+        'SĐT Người Gửi': sender?.phone || '',
+        'Địa Chỉ': sender?.address || '',
+        'Thành Tiền': order.totalAmount?.toLocaleString('vi-VN') + ' VNĐ',
+        'Đã Thanh Toán': payment?.paidAmount?.toLocaleString('vi-VN') + ' VNĐ',
+        'Còn Nợ': ((payment?.amount || 0) - (payment?.paidAmount || 0))?.toLocaleString('vi-VN') + ' VNĐ',
+        'Trạng Thái': payment?.status === 'PAID' ? 'Đã thanh toán' : 
+                      payment?.status === 'PARTIAL' ? 'Thanh toán một phần' : 
+                      'Chưa thanh toán',
+        'Ghi Chú': payment?.paymentNote || ''
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Công nợ');
+    
+    // Điều chỉnh độ rộng cột
+    const colWidths = [
+      { wch: 15 }, // Ngày Xuất
+      { wch: 10 }, // Mã Đơn
+      { wch: 25 }, // Người Gửi
+      { wch: 15 }, // SĐT
+      { wch: 30 }, // Địa Chỉ
+      { wch: 15 }, // Thành Tiền
+      { wch: 15 }, // Đã Thanh Toán
+      { wch: 15 }, // Còn Nợ
+      { wch: 15 }, // Trạng Thái
+      { wch: 30 }, // Ghi Chú
+    ];
+    ws['!cols'] = colWidths;
+
+    XLSX.writeFile(wb, `cong_no_${formatDate(new Date())}.xlsx`);
   };
 
   const handleImport = async (file: File) => {
@@ -122,7 +169,7 @@ export default function DebtPage() {
               icon={<DownloadOutlined />}
               onClick={handleExport}
             >
-              Xuất file
+              Xuất Excel
             </Button>
             <Button
               type="primary"
@@ -159,6 +206,9 @@ export default function DebtPage() {
             total: data.length,
             showSizeChanger: true,
           }}
+          scroll={{ x: 2000 }}
+          bordered
+          size="middle"
           rowSelection={rowSelection}
         />
       </Card>

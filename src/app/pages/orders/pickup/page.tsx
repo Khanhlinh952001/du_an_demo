@@ -15,6 +15,8 @@ import ExportModal from '@/components/common/ExportModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { nanoid } from 'nanoid';
 import { formatDate } from '@/utils/format';
+import { senderMockData } from '@/mocks/senderMockData';
+import { getCustomerById } from '@/utils/orderHelpers';
 
 const { Search } = Input;
 const { RangePicker } = DatePicker;
@@ -58,10 +60,13 @@ function PickUpPage() {
 
         // Sau đó lọc theo text search nếu có
         if (value.trim()) {
-            filtered = filtered.filter(pickup =>
-                pickup.senderName?.toLowerCase().includes(value.toLowerCase()) ||
-                pickup.senderPhone?.includes(value)
-            );
+            filtered = filtered.filter(pickup => {
+                const sender = getCustomerById(senderMockData, pickup.senderId || '');
+                return (
+                    sender?.name?.toLowerCase().includes(value.toLowerCase()) ||
+                    sender?.phone?.includes(value)
+                );
+            });
         }
 
         setSearchResults(filtered);
