@@ -2,20 +2,23 @@
 import { useState } from 'react';
 import { Order } from '@/types/Order';
 import { OrderMockData } from '@/mocks/OrderMock';
-import { Table, Button, Card, Input, Tabs, DatePicker, Select } from 'antd';
+import { Table, Button, Card, Input, Tabs, DatePicker, Select, Modal, message } from 'antd';
 import { DownloadOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 import ExportModal from '@/components/common/ExportModal';
 import { orderExportConfig, createExportData } from '@/configs/exportConfig';
-import { columns as airColumns } from "./columns";
+import { columns as airColumns } from "@/components/common/Columns";
 import MainLayout from '@/layout/MainLayout';
 import type { ColumnType, ColumnGroupType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { getCustomerForOrder, getRecipientForOrder } from '@/utils/orderHelpers';
+import { getCustomerForOrder, getPaymentForOrder, getRecipientForOrder } from '@/utils/orderHelpers';
 import { Sender } from '@/types/Sender';
 import { Recipient } from '@/types/Recipient';
+import { PaymentMockData } from '@/mocks/PaymentMockData';
+import { senderMockData } from '@/mocks/senderMockData';
+import { recipientMockData } from '@/mocks/recipientMockData';
 
 const { RangePicker } = DatePicker;
 const { Search } = Input;
@@ -28,10 +31,11 @@ export default function ManageOrders() {
     const [customerIdFilter, setCustomerIdFilter] = useState("");
     const [activeTab, setActiveTab] = useState<'sea' | 'air'>('sea');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    const [senders, setSenders] = useState<Sender[]>([]);
-    const [recipients, setRecipients] = useState<Recipient[]>([]);
+    const [senders, setSenders] = useState<Sender[]>(senderMockData);
+    const [recipients, setRecipients] = useState<Recipient[]>(recipientMockData);
+    const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // Column configurations
     const columnConfigs = [
         { key: 'orderId', label: 'Mã Đơn Hàng' },
         { key: 'senderId', label: 'Mã KH' },
@@ -41,6 +45,9 @@ export default function ManageOrders() {
           key: 'senderAddress', label: 'Dia chi gui'
         },
         {
+          key: 'serviceType', label: 'Loại Vận Chuyển'
+        },
+        {
           key: 'receiverName', label: 'Nguoi nhan'
         },
         {
@@ -48,12 +55,16 @@ export default function ManageOrders() {
         },
         {
           key: 'receiverRegion', label: 'Khu vuc '
-        },
+          },
         {
-          key: 'receiverAddress', label: 'Dia chi nhan '
+              key: 'receiverAddress', label: 'Dia chi nhan '
         },
+        { key: 'totalPackages', label: 'Số Kiện' },
+        { key: 'weight', label: 'Trọng Lượng' },
+        { key: 'price', label: 'Giá' },
         { key: 'totalAmount', label: 'Thành Tiền' },
         { key: 'paymentStatus', label: 'Thanh Toán' },
+        {key: 'paymentDetails', label:  'Chi tiết thanh toán'},
         { key: 'note', label: 'Ghi Chú' },
       ];
     
@@ -65,12 +76,17 @@ export default function ManageOrders() {
         senderName: true,
         senderPhone: true,
         senderAddress: true,
+        serviceType: true,
+        totalPackages: true,
+        weight: true,
+        price: true,
         receiverName: true,
         receiverPhone: true,
         receiverRegion: true,
         receiverAddress: true,
         totalAmount: true,
         paymentStatus: true,
+        paymentDetails: true,
         note: false,
       };
 
@@ -91,26 +107,30 @@ export default function ManageOrders() {
             return true;
         })
         .filter(order => {
-            // Cải thiện tìm kiếm bằng cách sử dụng thông tin từ sender
+            // Improved search by name or ID
             if (filter) {
                 const sender = getCustomerForOrder(senders, order.senderId);
+                const recipient = getRecipientForOrder(recipients, order.recipientId);
+                const searchTerm = filter.toLowerCase();
+                
                 return (
-                    sender?.name.toLowerCase().includes(filter.toLowerCase()) ||
-                    order.orderId.toLowerCase().includes(filter.toLowerCase()) 
-                    
-                  
+                    sender?.name?.toLowerCase().includes(searchTerm) ||
+                    recipient?.name?.toLowerCase().includes(searchTerm) ||
+                    order.orderId.toLowerCase().includes(searchTerm)
                 );
             }
             return true;
         })
         .filter(order => {
-            // Cải thiện tìm kiếm số điện thoại bằng cách kiểm tra cả người gửi và người nhận
+            // Improved phone number search
             if (phoneFilter) {
                 const sender = getCustomerForOrder(senders, order.senderId);
                 const recipient = getRecipientForOrder(recipients, order.recipientId);
+                const searchPhone = phoneFilter.trim();
+                
                 return (
-                    sender?.phone.includes(phoneFilter) ||
-                    recipient?.phone.includes(phoneFilter)
+                    sender?.phone?.includes(searchPhone) ||
+                    recipient?.phone?.includes(searchPhone)
                 );
             }
             return true;
@@ -118,7 +138,8 @@ export default function ManageOrders() {
         .filter(order => {
             // Lọc theo trạng thái thanh toán
             if (paymentStatusFilter) {
-                return order.paymentStatus === paymentStatusFilter;
+                const payment = getPaymentForOrder(PaymentMockData, order.paymentId || '');
+                return payment?.status === paymentStatusFilter;
             }
             return true;
         })
@@ -162,6 +183,52 @@ export default function ManageOrders() {
         reader.readAsArrayBuffer(file);
     };
 
+    const handleEdit = (record: Order) => {
+        setEditingOrder(record);
+        setIsEditModalOpen(true);
+    };
+
+    const handleDelete = (orderId: string) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa',
+            content: 'Bạn có chắc chắn muốn xóa đơn hàng này không?',
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk() {
+                // Implement actual delete logic here
+                message.success('Đã xóa đơn hàng thành công');
+            },
+        });
+    };
+
+    const actionColumn: ColumnType<Order> = {
+        title: 'Thao tác',
+        key: 'action',
+        width: 120,
+        render: (_, record) => (
+            <div className="flex gap-2">
+                <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => handleEdit(record)}
+                >
+                    Sửa
+                </Button>
+                <Button
+                    type="primary"
+                    danger
+                    size="small"
+                    onClick={() => handleDelete(record.orderId)}
+                >
+                    Xóa
+                </Button>
+            </div>
+        ),
+    };
+
+    const allColumns = [...filteredColumns, actionColumn] as (ColumnGroupType<Order> | ColumnType<Order>)[];
+
     const renderFilters = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <RangePicker
@@ -183,10 +250,16 @@ export default function ManageOrders() {
                 onChange={(e) => setPhoneFilter(e.target.value)}
                 className="w-full"
             />
+             <Search
+                placeholder="Tìm theo tên hoặc ID..."
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="w-full"
+            />
 
             <Select
                 placeholder="Trạng thái thanh toán"
-                value={paymentStatusFilter}
+                value={paymentStatusFilter || "All"}
                 onChange={setPaymentStatusFilter}
                 className="w-full"
                 allowClear
@@ -196,12 +269,7 @@ export default function ManageOrders() {
                 <Select.Option value="UNPAID">Chưa thanh toán</Select.Option>
             </Select>
 
-            <Search
-                placeholder="Tìm theo tên hoặc ID..."
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="w-full"
-            />
+           
         </div>
     );
 
@@ -229,13 +297,6 @@ export default function ManageOrders() {
                             accept=".xlsx, .xls"
                             onChange={handleUpdateFromExcel}
                             className="hidden"
-                        />
-                        <Search
-                            placeholder="Tìm kiếm theo ID hoặc tên người gửi..."
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                            className="max-w-md"
-                            size="middle"
                         />
                         <Button
                             icon={<UploadOutlined />}
@@ -277,7 +338,7 @@ export default function ManageOrders() {
                     />
                 </div>
                 <Table 
-                    columns={filteredColumns as (ColumnGroupType<Order> | ColumnType<Order>)[]}
+                    columns={allColumns}
                     dataSource={filteredOrders}
                     rowKey="orderId"
                     pagination={{
@@ -312,6 +373,41 @@ export default function ManageOrders() {
                     onExport={handleExport}
                     fields={orderExportConfig}
                 />
+
+                <Modal
+                    title="Chỉnh sửa đơn hàng"
+                    open={isEditModalOpen}
+                    onCancel={() => {
+                        setIsEditModalOpen(false);
+                        setEditingOrder(null);
+                    }}
+                    footer={[
+                        <Button 
+                            key="cancel" 
+                            onClick={() => {
+                                setIsEditModalOpen(false);
+                                setEditingOrder(null);
+                            }}
+                        >
+                            Hủy
+                        </Button>,
+                        <Button 
+                            key="submit" 
+                            type="primary"
+                            onClick={() => {
+                                // Implement save logic here
+                                message.success('Đã cập nhật đơn hàng thành công');
+                                setIsEditModalOpen(false);
+                                setEditingOrder(null);
+                            }}
+                        >
+                            Lưu
+                        </Button>,
+                    ]}
+                >
+                    {/* Add your edit form fields here */}
+                    <p>Form chỉnh sửa đơn hàng sẽ được thêm vào đây</p>
+                </Modal>
             </Card>
         </MainLayout>
     );

@@ -11,6 +11,7 @@ import type { Recipient } from '@/types/Recipient';
 import { ITEM_TYPES, ORDER_TYPE, SHIPPING_METHOD, ORDER_STATUS, PAYMENT_STATUS } from '@/constants';
 import { generateVietnamToKoreaAirBillId , generateKoreaToVietnamSeaBillId } from '@/utils/idGenerators';
 import { formatDate } from '@/utils/format';
+import { getCustomerForOrder } from '@/utils/orderHelpers';
 interface AddOrderModalProps {
   open: boolean;
   onCancel: () => void;
@@ -41,16 +42,10 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
         
         // Sender Information
         senderId: initialData.senderId,
-        senderName: initialData.senderName,
-        senderPhone: initialData.senderPhone,
-        senderAddress: initialData.senderAddress,
         
         // Receiver Information
-        receiverId: initialData.receiverId,
-        receiverName: initialData.receiverName,
-        receiverPhone: initialData.receiverPhone,
-        receiverAddress: initialData.receiverAddress,
-        receiverRegion: initialData.receiverRegion,
+        recipientId: initialData.recipientId,
+       
         
         // Shipping Information
         serviceType: initialData.shippingType,
@@ -58,20 +53,20 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
         price: initialData.price,
         
         // Package Information
-        packageType: initialData.itemType,
+        // itemType: initialData.itemType,
         weight: initialData.weight,
         totalPackages: initialData.totalPackages,
         trackingNumber: initialData.trackingNumber,
         
         // Dates
-        shipmentDate: dayjs(initialData.shipmentDate),
-        deliveryDate: dayjs(initialData.deliveryDate),
+        createdAt: dayjs(initialData.createdAt),
+        updatedAt: dayjs(initialData.updatedAt),
         
         // Status and Payment
-        status: initialData.status,
-        paymentStatus: initialData.paymentStatus,
+        // status: initialData.status,
+        // paymentStatus: initialData.paymentStatus,
         note: initialData.note,
-        paidAmount: initialData.paidAmount,
+        // paidAmount: initialData.paidAmount,
       });
       
       console.log('Form values after setting:', form.getFieldsValue()); // Debug log
@@ -82,104 +77,41 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
     try {
       const values = await form.validateFields();
       
-      // Required field validation
-      const requiredFields = {
-        senderName: 'Tên người gửi',
-        senderPhone: 'Số điện thoại người gửi',
-        senderAddress: 'Địa chỉ người gửi',
-        receiverName: 'Tên người nhận',
-        receiverPhone: 'Số điện thoại người nhận',
-        receiverAddress: 'Địa chỉ người nhận',
-        weight: 'Cân nặng',
-        price: 'Đơn giá',
-        serviceType: 'Loại dịch vụ',
-        shippingMethod: 'Phương thức vận chuyển'
-      };
-
-      const missingFields = [];
-      for (const [field, label] of Object.entries(requiredFields)) {
-        if (!values[field]) {
-          missingFields.push(label);
-        }
-      }
-
-      // Specific validations
-      if (values.weight <= 0) {
-        missingFields.push('Cân nặng phải lớn hơn 0');
-      }
-      if (values.price <= 0) {
-        missingFields.push('Đơn giá phải lớn hơn 0');
-      }
-
-      if (missingFields.length > 0) {
-        Modal.error({
-          title: 'Thông tin không hợp lệ',
-          content: (
-            <div>
-              <p>Vui lòng điền đầy đủ các thông tin sau:</p>
-              <ul>
-                {missingFields.map((field, index) => (
-                  <li key={index}>{field}</li>
-                ))}
-              </ul>
-            </div>
-          ),
-        });
-        return;
-      }
-
       // Generate appropriate ID based on shipping method
       let generatedId;
-      if (values.shippingMethod === 'air') {
+      if (values.shippingMethod === SHIPPING_METHOD.AIR) {
         generatedId = generateVietnamToKoreaAirBillId();
-      } else if (values.shippingMethod === 'sea') {
+      } else if (values.shippingMethod === SHIPPING_METHOD.SEA) {
         generatedId = generateKoreaToVietnamSeaBillId();
       }
+
+      // Calculate total amount
+      const totalAmount = values.weight * values.price;
       
       // Format the order data according to Order interface
       const formattedOrder: Order = {
-        // Use the generated ID for both orderId and trackingNumber
+        // IDs
         orderId: generatedId || crypto.randomUUID(),
         trackingNumber: generatedId || '',
-        
-        // Rest of the order properties
         manageId: values.manageId || '',
         handlerId: values.handlerId,
-        
-        // Sender Information
-        senderId: values.senderId || '',
-        senderName: values.senderName || '',
-        senderPhone: values.senderPhone || '',
-        senderAddress: values.senderAddress || '',
-        
-        // Receiver Information
-        receiverId: values.receiverId || '',
-        receiverName: values.receiverName || '',
-        receiverPhone: values.receiverPhone || '',
-        receiverAddress: values.receiverAddress || '',
-        receiverRegion: values.receiverRegion || '',
+        senderId: form.getFieldValue('senderId') || '',
+        recipientId: form.getFieldValue('recipientId') || '',
         
         // Shipping Information
-      
-        serviceType: values.shippingMethod || 'air',
-        shippingType: values.serviceType || 'export',
+        serviceType: values.shippingMethod,
+        shippingType: values.serviceType,
         price: values.price || 0,
         
         // Package Information
-        itemType: values.packageType || ITEM_TYPES.OTHER,
         weight: values.weight || 0,
         totalPackages: values.totalPackages || 0,
         
         // Dates
-        // shipmentDate: formatDate( values.shipmentDate?.toDate()) || formatDate(new Date()), 
-        // deliveryDate: formatDate(values.deliveryDate?.toDate())  || formatDate(new Date()) ,
-        createdAt: mode === 'add' ? formatDate(new Date())  : initialData?.createdAt || formatDate(new Date()) ,
-        updatedAt: formatDate(new Date()) ,
-       
-        // Status and Payment
-        status: values.status || ORDER_STATUS.PENDING,
-        paymentStatus: values.paymentStatus || PAYMENT_STATUS.UNPAID,
-        totalAmount: (values.price || 0) * (values.weight || 0),
+        createdAt: mode === 'add' ? formatDate(new Date()) : initialData?.createdAt || formatDate(new Date()),
+        updatedAt: formatDate(new Date()),
+        
+        totalAmount: totalAmount,
         note: values.note,
       };
 
@@ -216,33 +148,20 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
   };
 
   const handleCustomerSelect = (senderId: string) => {
-    const selected = searchResults.find(sender => sender.senderId === senderId);
-    console.log('Selected sender:', selected);
+    const selected = getCustomerForOrder(searchResults, senderId);
     if (selected) {
-      // Tạo mảng channels dựa trên dữ liệu thực tế
-    
-
       form.setFieldsValue({
-        senderId:selected.senderId,
+        senderId: selected.senderId,
         senderName: selected.name,
         senderPhone: selected.phone,
         senderAddress: selected.address,
         facebook: selected.facebook,
         zalo: selected.zalo,
-        price: selected.unitPrice,
-        contactChannels:  selected.contactChannels // Set channels dựa trên dữ liệu thực tế
+        contactChannels: selected.contactChannels,
+        senderSearch: selected.name
       });
-      
-      console.log('Form values after set:', form.getFieldsValue());
-      
-      // If recipient is already selected, clear all results
-      if (form.getFieldValue('receiverName')) {
-        setSearchResults([]);
-        setRecipientResults([]);
-        return;
-      }
 
-      // Otherwise, show matching recipients
+      // Show matching recipients
       const matchingRecipients = recipientMockData.filter(
         recipient => recipient.senderId === senderId
       );
@@ -277,21 +196,22 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
   // Update handleRecipientSelect
   const handleRecipientSelect = (recipient: Recipient) => {
     form.setFieldsValue({
-      receiverId:recipient.recipientId,
+      recipientId: recipient.recipientId,
       receiverName: recipient.name,
       receiverPhone: recipient.phone,
       receiverAddress: recipient.address,
       receiverRegion: recipient.region,
+      receiverSearch: recipient.name
     });
 
-    // If sender is already selected, clear all results
+    // If sender is already selected, clear results
     if (form.getFieldValue('senderName')) {
       setSearchResults([]);
       setRecipientResults([]);
       return;
     }
 
-    // Otherwise, show matching senders
+    // Show matching senders
     const matchingSenders = senderMockData.filter(
       sender => sender.senderId === recipient.senderId
     );
@@ -391,6 +311,7 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
                         onChange={(e) => handleNameSearch(e.target.value)}
                         allowClear
                         prefix={<SearchOutlined />}
+                        value={form.getFieldValue('senderName')}
                       />
                     </Form.Item>
                   </Space.Compact>
@@ -459,7 +380,7 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
                     <Input 
                       prefix={<UserOutlined className="text-gray-400" />} 
                       disabled 
-                      value={form.getFieldValue('receiverId') ? `#${form.getFieldValue('receiverId')}` : ''} 
+                      value={form.getFieldValue('recipientId') ? `#${form.getFieldValue('recipientId')}` : ''} 
                       className="w-32 ml-2"
                       style={{ 
                         backgroundColor: '#f5f5f5',
@@ -477,6 +398,7 @@ const AddOrderModal: React.FC<AddOrderModalProps> = ({
                         onChange={(e) => handleRecipientSearch(e.target.value)}
                         allowClear
                         prefix={<SearchOutlined />}
+                        value={form.getFieldValue('receiverName')}
                       />
                     </Form.Item>
                   </Space.Compact>

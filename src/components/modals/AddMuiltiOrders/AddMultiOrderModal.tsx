@@ -54,6 +54,7 @@ const AddMultiOrderModal: React.FC<AddMultiOrderModalProps> = ({
         senderName: row['Người Gửi'] || '',
         senderPhone: row['SĐT Người Gửi'] || '',
         senderAddress: row['Địa Chỉ Người Gửi'] || '',
+        
         receiverName: row['Người Nhận'] || '',
         receiverPhone: row['SĐT Người Nhận'] || '',
         receiverAddress: row['Địa Chỉ Người Nhận'] || '',

@@ -11,7 +11,7 @@ export const recipientMockData: Recipient[] = [
     region: 'HN',
     shipper: 'Giao Hang Nhanh',
     note: 'Giao giờ hành chính',
-    senderId: 'KH001',
+    senderId: 'SND001',
     isConfirmed: true,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),

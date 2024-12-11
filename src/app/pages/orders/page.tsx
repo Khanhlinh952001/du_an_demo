@@ -11,11 +11,13 @@ import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 import ExportModal from '@/components/common/ExportModal';
 import { orderExportConfig, createExportData } from '@/configs/exportConfig';
-import { columns } from './columns'
+import { columns } from '@/components/common/Columns';
 import MainLayout from '@/layout/MainLayout';
 import AddMultiOrderModal from '@/components/modals/AddMuiltiOrders/AddMultiOrderModal';
 import PrintModal from '@/components/modals/PrintModal';
 import { PAYMENT_STATUS } from '@/constants/payments';
+import { getPaymentForOrder } from '@/utils/orderHelpers';
+import { PaymentMockData } from '@/mocks/PaymentMockData';
 export default function CreateSingleOrder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMultiModalOpen, setIsMultiModalOpen] = useState(false);
@@ -39,6 +41,9 @@ export default function CreateSingleOrder() {
       key: 'senderAddress', label: 'Dia chi gui'
     },
     {
+      key: 'serviceType', label: 'Loại Vận Chuyển'
+    },
+    {
       key: 'receiverName', label: 'Nguoi nhan'
     },
     {
@@ -46,12 +51,16 @@ export default function CreateSingleOrder() {
     },
     {
       key: 'receiverRegion', label: 'Khu vuc '
-    },
+      },
     {
-      key: 'receiverAddress', label: 'Dia chi nhan '
+          key: 'receiverAddress', label: 'Dia chi nhan '
     },
+    { key: 'totalPackages', label: 'Số Kiện' },
+    { key: 'weight', label: 'Trọng Lượng' },
+    { key: 'price', label: 'Giá' },
     { key: 'totalAmount', label: 'Thành Tiền' },
     { key: 'paymentStatus', label: 'Thanh Toán' },
+    {key: 'paymentDetails', label:  'Chi tiết thanh toán'},
     { key: 'note', label: 'Ghi Chú' },
   ];
 
@@ -63,12 +72,17 @@ export default function CreateSingleOrder() {
     senderName: true,
     senderPhone: true,
     senderAddress: true,
+    serviceType: true,
+    totalPackages: true,
+    weight: true,
+    price: true,
     receiverName: true,
     receiverPhone: true,
     receiverRegion: true,
     receiverAddress: true,
     totalAmount: true,
     paymentStatus: true,
+    paymentDetails: true,
     note: false,
   };
 
@@ -120,8 +134,8 @@ export default function CreateSingleOrder() {
     setEditingOrder({
       ...record,
       // Ensure dates are properly formatted
-      shipmentDate: record.shipmentDate ? new Date(record.shipmentDate) : new Date(),
-      deliveryDate: record.deliveryDate ? new Date(record.deliveryDate) : new Date(),
+      // shipmentDate: record.shipmentDate ? new Date(record.shipmentDate) : new Date(),
+      // deliveryDate: record.deliveryDate ? new Date(record.deliveryDate) : new Date(),
       createdAt: record.createdAt ? new Date(record.createdAt) : new Date(),
       updatedAt: record.updatedAt ? new Date(record.updatedAt) : new Date(),
     });
@@ -200,6 +214,7 @@ export default function CreateSingleOrder() {
   const actionColumn: ColumnsType<Order>[0] = {
     title: 'Thao tác',
     key: 'action',
+    dataIndex :'orderId',
     fixed: 'right',
     width: 180,
     render: (_, record) => (
@@ -216,7 +231,7 @@ export default function CreateSingleOrder() {
           onClick={() => handleDelete(record)}
           className="text-red-500 hover:text-red-600"
         />
-        {record.paymentStatus !== PAYMENT_STATUS.PAID && (
+        {(getPaymentForOrder(PaymentMockData, record.paymentId || '')?.status) !== PAYMENT_STATUS.PAID && (
           <Button
             type="text"
             icon={<DollarOutlined />}

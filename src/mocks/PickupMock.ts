@@ -3,11 +3,8 @@ import { formatDate } from "@/utils/format";
 export const mockPickups: PickupInfo[] = [
     {
         pickupId: "PU004",
-        senderId: "KH004",
-        senderName: "Phạm Thị D",
-        senderPhone: "0934567890",
-        senderAddress: "147 Nguyễn Du, Q1, TP.HCM",
-        senderContactChannels: ["Zalo"],
+        senderId: "VHMVC0002",
+        
         handlerId: "HDL001",
         packageCount: 2,
         pickupAddress: "258 Lý Tự Trọng, Q1, TP.HCM",
@@ -28,7 +25,7 @@ export const mockPickups: PickupInfo[] = [
             longitude: 106.7012,
             landmark: "Gần chợ Bến Thành"
         },
-        images: [],
+        images: ['https://picsum.photos/200/300', 'https://picsum.photos/200/300'],
         documents: [],
         specialInstructions: "Gọi trước 30 phút",
         estimatedDuration: 45,
@@ -43,11 +40,8 @@ export const mockPickups: PickupInfo[] = [
     },
     {
         pickupId: "PU001",
-        senderId: "KH001",
-        senderName: "Nguyễn Văn A",
-        senderPhone: "0901234567",
-        senderAddress: "123 Nguyễn Huệ, Q1, TP.HCM",
-        senderContactChannels: ["Facebook", "Zalo"],
+        senderId: "VHMVC0003",
+
         handlerId: "HDL001",
         packageCount: 3,
         pickupAddress: "456 Lê Lợi, Q1, TP.HCM",
@@ -90,11 +84,8 @@ export const mockPickups: PickupInfo[] = [
     },
     {
         pickupId: "PU002",
-        senderId: "KH002",
-        senderName: "Trần Thị B",
-        senderPhone: "0912345678",
-        senderAddress: "789 Điện Biên Phủ, Q3, TP.HCM",
-        senderContactChannels: ["Zalo", "KakaoTalk"],
+        senderId: "VHMVC0002",
+
         handlerId: "HDL002",
         packageCount: 2,
         pickupAddress: "147 Võ Văn Tần, Q3, TP.HCM",
@@ -135,11 +126,8 @@ export const mockPickups: PickupInfo[] = [
     },
     {
         pickupId: "PU003",
-        senderId: "KH003",
-        senderName: "Lê Văn C",
-        senderPhone: "0923456789",
-        senderAddress: "258 Nguyễn Thị Minh Khai, Q1, TP.HCM",
-        senderContactChannels: ["Facebook"],
+                senderId: "VHMVC0002",
+
         handlerId: "HDL003",
         packageCount: 1,
         pickupAddress: "369 Hai Bà Trưng, Q1, TP.HCM",

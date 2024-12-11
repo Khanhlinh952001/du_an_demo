@@ -1,31 +1,23 @@
 "use client"
 import { useState } from 'react';
 import { Order } from '@/types/Order';
-import { Card, Form, Input, DatePicker, Select, Button, Table, Space, Tabs, Row, Col } from 'antd';
+import { Card, Form, Input, DatePicker, Select, Button, Table, Space, Tabs, Row, Col, Tooltip } from 'antd';
 import { SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ColumnType, ColumnGroupType } from 'antd/es/table';
 import MainLayout from '@/layout/MainLayout';
-import { REGION,ORDER_TYPE } from '@/constants';
-const { RangePicker } = DatePicker;
-import { columns } from './columns';
 import { OrderMockData } from '@/mocks/OrderMock';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
 import * as XLSX from 'xlsx';
 import { orderExportConfig, createExportData } from '@/configs/exportConfig';
 import ExportModal from '@/components/common/ExportModal';
-import { formatDate } from '@/utils/format';
-import { 
-    filterByDateRange, 
-    filterBySender, 
-    filterByReceiver, 
-    filterByRegion, 
-    filterByPaymentStatus, 
-    filterByOrderType,
-    filterByServiceType 
-} from '@/utils/filters';
-import SearchModal from '@/components/common/SearchModal';
+import { recipientMockData } from '@/mocks/recipientMockData';
+import { PaymentMockData } from '@/mocks/PaymentMockData';
 
+import { columns } from '@/components/common/Columns';
+import SearchModal from '@/components/common/SearchModal';
+import { senderMockData } from '@/mocks/senderMockData';
+import { getCustomerForOrder, getRecipientForOrder } from '@/utils/orderHelpers';
 export default function SearchPage() {
     const [form] = Form.useForm();
     const [activeTab, setActiveTab] = useState<'sea' | 'air'>('sea');
@@ -41,6 +33,7 @@ export default function SearchPage() {
         { key: 'senderName', label: 'Người Gửi' },
         { key: 'senderPhone', label: 'SĐT Người Gửi' },
         { key: 'senderAddress', label: 'Địa Chỉ Người Gửi' },
+        { key: 'serviceType', label: 'Loại Vận Chuyển' },
         { key: 'receiverName', label: 'Người Nhận' },
         { key: 'receiverPhone', label: 'SĐT Người Nhận' },
         { key: 'receiverRegion', label: 'Khu Vực' },
@@ -59,6 +52,7 @@ export default function SearchPage() {
         senderName: true,
         senderPhone: true,
         senderAddress: true,
+        serviceType: true,
         receiverName: true,
         receiverPhone: true,
         receiverRegion: true,
@@ -78,72 +72,80 @@ export default function SearchPage() {
     } = useColumnVisibility(columns, defaultVisibleColumns);
 
     const onFinish = (values: any) => {
-        let filtered = [...OrderMockData];
-        
-        // Lọc theo ngày gửi
-        if (values.createdAt && values.createdAt.length === 2) {
-            const [startDate, endDate] = values.createdAt;
-            filtered = filterByDateRange(
-                filtered, 
-                startDate.toDate(), 
-                endDate.toDate(), 
-                'createdAt'  // hoặc 'createdAt' tùy theo trường ngày trong data
-            );
-        }
+        try {
+            let filtered = [...OrderMockData];
 
-        // Lọc theo dịch vụ vận chuyển (air/sea)
-        if (values.shippingService) {
-            filtered = filterByServiceType(filtered, values.shippingService);
-        }
-
-        // Lọc theo hình thức vận chuyển (import/export)
-        if (values.shippingMethod) {
-            filtered = filterByOrderType(filtered, values.shippingMethod);
-        }
-
-        // Lọc theo khu vực
-        if (values.receiverRegion) {
-            filtered = filterByRegion(filtered, values.receiverRegion);
-        }
-
-        // Lọc theo trạng thái vận chuyển
-        if (values.shippingStatus) {
-            filtered = filtered.filter(order => order.status === values.shippingStatus);
-        }
-
-        // Lọc theo trạng thái thanh toán
-        if (values.paymentStatus) {
-            filtered = filterByPaymentStatus(filtered, values.paymentStatus);
-        }
-
-        // Lọc theo thông tin người gửi (bao gồm mã, tên, số điện thoại)
-        if (values.customerCode || values.sender || values.senderPhone) {
-            if (values.customerCode) {
-                filtered = filterBySender(filtered, values.customerCode);
+            // Xử lý điều kiện ngày
+            if (values.createdAt?.length === 2) {
+                const startDate = values.createdAt[0].startOf('day').toDate();
+                const endDate = values.createdAt[1].endOf('day').toDate();
+                filtered = filtered.filter(order => {
+                    const orderDate = new Date(order.createdAt);
+                    return orderDate >= startDate && orderDate <= endDate;
+                });
             }
-            if (values.sender) {
-                filtered = filterBySender(filtered, values.sender);
-            }
-            if (values.senderPhone) {
-                filtered = filterBySender(filtered, values.senderPhone);
-            }
-        }
 
-        // Lọc theo thông tin người nhận (bao gồm mã, tên, số điện thoại)
-        if (values.receiverCode || values.receiver || values.receiverPhone) {
-            if (values.receiverCode) {
-                filtered = filterByReceiver(filtered, values.receiverCode);
+            // Xử lý điều kiện dịch vụ
+            if (values.shippingService) {
+                filtered = filtered.filter(order => 
+                    order.serviceType.toLowerCase() === values.shippingService.toLowerCase()
+                );
             }
-            if (values.receiver) {
-                filtered = filterByReceiver(filtered, values.receiver);
-            }
-            if (values.receiverPhone) {
-                filtered = filterByReceiver(filtered, values.receiverPhone);
-            }
-        }
 
-        setSearchResults(filtered);
-        setHasSearched(true);
+            // Xử lý điều kiện vận chuyển
+            if (values.shippingMethod) {
+                filtered = filtered.filter(order => 
+                    order.shippingType.toLowerCase() === values.shippingMethod.toLowerCase()
+                );
+            }
+
+            // Xử lý điều kiện khu vực
+            if (values.receiverRegion) {
+                filtered = filtered.filter(order => {
+                    const recipient = recipientMockData.find(r => r.recipientId === order.recipientId);
+                    return recipient?.region === values.receiverRegion;
+                });
+            }
+
+            // Xử lý điều kiện thanh toán
+            if (values.paymentStatus) {
+                filtered = filtered.filter(order => {
+                    const payment = PaymentMockData.find(p => p.orderId === order.orderId);
+                    return payment?.status === values.paymentStatus;
+                });
+            }
+
+            // Xử lý tìm kiếm người gửi
+            if ( values.sender || values.senderPhone) {
+                filtered = filtered.filter(order => {
+                    const sender = getCustomerForOrder(senderMockData, order.senderId);
+                    return (
+                        // (!values.customerCode || sender?.senderId === values.customerCode) &&
+                        (!values.sender || sender?.name.toLowerCase().includes(values.sender.toLowerCase())) &&
+                        (!values.senderPhone || sender?.phone.includes(values.senderPhone))
+                    );
+                });
+            }
+
+            // Xử lý tìm kiếm người nhận
+            if (values.receiverCode || values.receiver || values.receiverPhone) {
+                filtered = filtered.filter(order => {
+                    console.log(values);
+                    const receiver = getRecipientForOrder(recipientMockData, order.recipientId);
+                    return (
+                        (!values.receiverCode || receiver?.recipientId === values.receiverCode) &&
+                        (!values.receiver || receiver?.name.toLowerCase().includes(values.receiver.toLowerCase())) &&
+                        (!values.receiverPhone || receiver?.phone.includes(values.receiverPhone))
+                    );
+                });
+            }
+
+            setSearchResults(filtered);
+            setHasSearched(true);
+
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm:", error);
+        }
     };
     const onReset = () => {
         form.resetFields();
@@ -152,8 +154,29 @@ export default function SearchPage() {
     };
 
     const handleExport = (selectedFields: string[]) => {
-        const exportData = createExportData(searchResults, selectedFields, orderExportConfig);
-        const ws = XLSX.utils.json_to_sheet(exportData);
+        // Tạo dữ liệu xuất với thông tin đầy đủ
+        const exportData = searchResults.map(order => {
+            const sender = getCustomerForOrder(senderMockData, order.senderId);
+            const recipient = getRecipientForOrder(recipientMockData, order.recipientId);
+            
+            return {
+                ...order,
+                // Thêm thông tin người gửi
+                senderName: sender?.name || '',
+                senderPhone: sender?.phone || '',
+                senderAddress: sender?.address || '',
+                
+                // Thêm thông tin người nhận
+                receiverName: recipient?.name || '',
+                receiverPhone: recipient?.phone || '',
+                receiverAddress: recipient?.address || '',
+                receiverRegion: recipient?.region || '',
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(
+            createExportData(exportData, selectedFields, orderExportConfig)
+        );
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Danh sách đơn hàng");
         XLSX.writeFile(wb, `don_hang_${activeTab}_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -168,7 +191,14 @@ export default function SearchPage() {
                     <p className="text-gray-500 mt-1">Tìm kiếm thông tin đơn hàng</p>
                 </div>
 
-                <div className="mb-4 flex w-full justify-end">
+                <div className="mb-4 flex w-full justify-end space-x-2">
+                    <Button 
+                        icon={<DownloadOutlined />}
+                        onClick={() => setIsExportModalOpen(true)}
+                        disabled={!hasSearched || searchResults.length === 0}
+                    >
+                        Xuất Excel
+                    </Button>
                     <Button 
                         type="primary" 
                         icon={<SearchOutlined />}
@@ -176,18 +206,20 @@ export default function SearchPage() {
                     >
                         Tìm kiếm
                     </Button>
-                </div>
+                    <Tooltip title="Tùy chỉnh hiển thị">
 
-                {hasSearched && (
-                    <>
-                        <Card title="Tùy chỉnh hiển thị" className="mb-4">
-                            <ColumnVisibilityControl
+                    <ColumnVisibilityControl
                                 columns={columnConfigs}
                                 visibleColumns={visibleColumns}
                                 onChange={handleColumnVisibilityChange}
                             />
-                        </Card>
+                    </Tooltip>
 
+                </div>
+
+                {hasSearched && (
+                    <>
+                           
                         {searchResults.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <Table
@@ -243,6 +275,7 @@ export default function SearchPage() {
                     open={isExportModalOpen}
                     onCancel={() => setIsExportModalOpen(false)}
                     onExport={handleExport}
+                    
                     fields={orderExportConfig}
                 />
             </Card>

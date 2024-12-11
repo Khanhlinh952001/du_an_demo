@@ -72,9 +72,9 @@ const SearchModal = ({ open, onCancel, onSearch, onReset }: SearchModalProps) =>
                     </Col>
 
                     <Col span={6}>
-                        <Form.Item label="Mã khách hàng" name="customerCode">
+                        {/* <Form.Item label="Mã khách hàng" name="customerCode">
                             <Input placeholder="Nhập mã khách hàng" />
-                        </Form.Item>
+                        </Form.Item> */}
                         <Form.Item label="Người gửi" name="sender">
                             <Input placeholder="Nhập tên người gửi" />
                         </Form.Item>
@@ -84,9 +84,9 @@ const SearchModal = ({ open, onCancel, onSearch, onReset }: SearchModalProps) =>
                     </Col>
 
                     <Col span={6}>
-                        <Form.Item label="Mã Người nhận" name="receiverCode">
+                        {/* <Form.Item label="Mã Người nhận" name="receiverCode">
                             <Input placeholder="Nhập mã khách hàng" />
-                        </Form.Item>
+                        </Form.Item> */}
                         <Form.Item label="Người nhận" name="receiver">
                             <Input placeholder="Nhập tên người nhận" />
                         </Form.Item>

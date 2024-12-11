@@ -5,38 +5,20 @@ export interface Order {
     orderId: string;          // Mã đơn hàng
     manageId: string;         // ID Admin quản lý
     handlerId?: string;       // ID người phụ trách
-    
-    // Sender Information
     senderId: string;         // Mã người gửi
-  
-    // Receiver Information
     recipientId: string;       // Mã người nhận
-  
+    deliveryId?: string;       // Mã vận đơn
+    paymentId?: string;        // Mã thanh toán
     serviceType: 'air' | 'sea'; // Loại dịch vụ
     shippingType: 'import' | 'export'; // Hình thức vận chuyển
     price:number,
-    // Package Information
-    itemType: ItemType;       // Loại hàng hóa
     weight: number;           // Khối lượng (kg)
     totalPackages: number;    // Số kiện hàng
     trackingNumber: string;   // Mã tracking
-    
-    // Dates
-    shipmentDate?: Date | string;       // Ngày gửi
-    deliveryDate?: Date |string;       // Ngày nhận dự kiến
     createdAt: Date | string; 
     updatedAt: Date | string;
-    
-    // Status and Payment
-    status: OrderStatus;      // Trạng thái đơn hàng
-    paymentStatus: PaymentStatus; // Trạng thái thanh toán
     totalAmount: number;      // Tổng tiền
     note?: string;            // Ghi chú
-    paidAmount?: number;
-    remainingAmount?: number;
-    
-    // Additional suggested fields
-    orderCode?: string;        // Mã đơn hàng bổ sung (có thể dùng cho mã vận đơn quốc tế)
     items?: OrderItem[];       // Chi tiết các mặt hàng trong đơn
     history?: OrderHistory[];  // Lịch sử thay đổi trạng thái
     attachments?: string[];    // Danh sách file đính kèm

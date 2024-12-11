@@ -10,6 +10,7 @@ import {
   Button,
   Select,
   Modal,
+  Tag,
 } from 'antd';
 import { SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import MainLayout from '@/layout/MainLayout';
@@ -17,15 +18,21 @@ import { Order } from '@/types/Order';
 import { columns } from './columns';
 import ExportModal from '@/components/common/ExportModal';
 import { OrderMockData } from '@/mocks/OrderMock';
+import { PaymentMockData } from '@/mocks/PaymentMockData';
 const { Search } = Input;
-import { filterUnpaidOrPartialPaidOrders } from '@/utils/filters';
 import QuotationPDF from '@/components/QuotationPDF';
-
+import { getPaymentForOrder } from '@/utils/orderHelpers';
 export default function DebtPage() {
   const [searchText, setSearchText] = useState('');
   const [selectedRows, setSelectedRows] = useState<Order[]>([]);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const data = filterUnpaidOrPartialPaidOrders(OrderMockData)
+  const data = OrderMockData.filter(order => {
+    const payment = getPaymentForOrder(PaymentMockData, order.paymentId || '');
+    if (!payment) return false;
+    
+    return payment.paidAmount === 0 || 
+           (payment.isPartialPayment && payment.remainingAmount > 0);
+  });
   console.log(data)
   const debtExportConfig = [
     { key: 'customerCode', label: 'Mã khách hàng' },
@@ -38,6 +45,13 @@ export default function DebtPage() {
     { key: 'status', label: 'Trạng thái' },
   ];
   
+  const statusConfig = {
+    UNPAID: { color: 'red', text: 'Chưa thanh toán' },
+    PARTIAL_PAID: { color: 'orange', text: 'Thanh toán một phần' },
+    PAID: { color: 'green', text: 'Đã thanh toán' },
+    // PENDING: { color: 'blue', text: 'Đang xử lý' },
+    // REFUNDED: { color: 'purple', text: 'Đã hoàn tiền' }
+  };
 
   const handleSearch = (value: string) => {
     // Implement search logic here

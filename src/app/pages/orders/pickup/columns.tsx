@@ -2,7 +2,10 @@ import { PickupInfo } from '@/types/Pickup';
 import { Button, Space, Tag, Tooltip, Image } from 'antd';
 import { PhoneOutlined, FacebookFilled, MessageFilled, WechatOutlined } from "@ant-design/icons";
 import dayjs from 'dayjs';
-
+import { getCustomerById } from '@/utils/orderHelpers';
+import { senderMockData } from '@/mocks/senderMockData';
+import Link from 'next/link';
+import { SiKakaotalk, SiZalo } from 'react-icons/si';
 export const createColumns = (setSelectedPickup: (pickup: PickupInfo) => void, setIsModalOpen: (isOpen: boolean) => void) => [
     {
         title: 'Mã Pickup',
@@ -16,45 +19,59 @@ export const createColumns = (setSelectedPickup: (pickup: PickupInfo) => void, s
         children: [
             {
                 title: 'Tên',
-                dataIndex: 'senderName',
+                dataIndex: 'senderId',
                 key: 'senderName',
                 width: 150,
+                render: (senderId: string) => getCustomerById(senderMockData , senderId)?.name || '-',
             },
             {
                 title: 'Liên hệ',
+                dataIndex: 'senderId',
                 key: 'contactInfo',
                 width: 150,
-                render: (_: any, record: PickupInfo) => (
-                    <Space>
-                        {record.senderPhone && (
-                            <Tooltip title={record.senderPhone}>
-                                <PhoneOutlined className="text-blue-500" />
+                render: (senderId: string) => {
+                    const customer = getCustomerById(senderMockData, senderId);
+                    if (!customer) return '-';
+                    
+                    return (
+                        <Space>
+                          
+                            <Tooltip title={
+                                <Space direction="horizontal">
+                                    {customer.contactChannels.includes('Facebook') && (
+                                        <Link href={`https://facebook.com/${customer.facebook}`} target="_blank">
+                                            <FacebookFilled className='text-blue-500 bg-white rounded p-1' />
+                                        </Link>
+                                    )}
+                                    {customer.contactChannels.includes('Zalo') && (
+                                        <Link href={`https://zalo.me/${customer.zalo}`} target="_blank">
+                                            <SiZalo className='text-blue-500 bg-white rounded text-xl p-1' />
+                                        </Link>
+                                    )}
+                                    {customer.contactChannels.includes('KakaoTalk') && (
+                                           <Link href={`https://kakao.com/${customer.kakaoTalk}`} target="_blank">
+                                           <SiKakaotalk className='text-blue-500 bg-white rounded text-xl p-1' />
+                                           </Link> 
+                                    )}
+                                </Space>
+                            }>
+                                {/* <PhoneOutlined /> */}
+                          
+                                {customer.phone}
                             </Tooltip>
-                        )}
-                        {record.senderContactChannels?.includes('Facebook') && (
-                            <Tooltip title="Facebook">
-                                <FacebookFilled className="text-blue-600" />
-                            </Tooltip>
-                        )}
-                        {record.senderContactChannels?.includes('Zalo') && (
-                            <Tooltip title="Zalo">
-                                <MessageFilled className="text-blue-400" />
-                            </Tooltip>
-                        )}
-                        {record.senderContactChannels?.includes('KakaoTalk') && (
-                            <Tooltip title="KakaoTalk">
-                                <WechatOutlined className="text-yellow-500" />
-                            </Tooltip>
-                        )}
-                    </Space>
-                ),
+                        </Space>
+                    );
+                },
             },
+            
+
             {
                 title: 'Địa chỉ',
-                dataIndex: 'senderAddress',
+                dataIndex: 'senderId',
                 key: 'senderAddress',
                 width: 200,
                 ellipsis: true,
+                render: (senderId: string) => getCustomerById(senderMockData, senderId)?.address || '-',
             },
         ],
     },
@@ -106,6 +123,18 @@ export const createColumns = (setSelectedPickup: (pickup: PickupInfo) => void, s
                 key: 'specialInstructions',
                 width: 200,
                 ellipsis: true,
+            },
+            {
+                title: 'Hình ảnh',
+                dataIndex: 'images',
+                key: 'images',
+                width: 100,
+                ellipsis: true,
+                render: (images: string[]) => {
+                    return images.map((image, index) => (
+                        <Image src={image} alt={`Image ${index + 1}`} width={50} height={50} />
+                    ));
+                },
             },
         ],
     },

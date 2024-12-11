@@ -7,13 +7,13 @@ import { Table, Button, Checkbox, Modal, Input, Card, DatePicker, Select, Form, 
 import { senderMockData } from '@/mocks/senderMockData';
 import ColumnVisibilityControl from '@/components/common/ColumnVisibilityControl';
 import { useColumnVisibility } from '@/hooks/useColumnVisibility';
-import { columns } from './columns';
 import { EditOutlined, DeleteOutlined, UsergroupAddOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import RecipientPage from "../recipients/page";
 import * as XLSX from 'xlsx';
 import { senderExportConfig, createExportData } from '@/configs/exportConfig';
 import ExportModal from '@/components/common/ExportModal';
 import RecipientList from "@/components/recipients/RecipientList";
+import { columns } from "./columns";
+import { message } from 'antd';
 
 export default function SenderPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +48,7 @@ export default function SenderPage() {
   const defaultVisibleColumns = {
     senderId: true,
     name: true,
+
     contact: true,
     social: true,
     contactChannels: true,
@@ -93,22 +94,27 @@ export default function SenderPage() {
   };
 
   const handleSearch = (value: string) => {
-    let filtered = senders;
+    let filtered = senderMockData;
 
-    // Text search (updated to include senderId)
+    // Text search với điều kiện case-insensitive
     if (value.trim()) {
+      const searchTerm = value.toLowerCase().trim();
       filtered = filtered.filter(sender =>
-        sender.name.toLowerCase().includes(value.toLowerCase()) ||
-        sender.phone.includes(value) ||
-        sender.senderId.toLowerCase().includes(value.toLowerCase())  // Add ID search
+        sender.name.toLowerCase().includes(searchTerm) ||
+        sender.phone.includes(searchTerm) ||
+        sender.senderId.toLowerCase().includes(searchTerm) ||
+        sender.address?.toLowerCase().includes(searchTerm)
       );
     }
 
     // Date range search
     if (dateRange[0] && dateRange[1]) {
+      const startDate = dateRange[0].startOf('day').valueOf();
+      const endDate = dateRange[1].endOf('day').valueOf();
+      
       filtered = filtered.filter(sender => {
-        const registerDate = new Date(sender.registerDate);
-        return registerDate >= dateRange[0] && registerDate <= dateRange[1];
+        const senderDate = new Date(sender.joinDate).valueOf();
+        return senderDate >= startDate && senderDate <= endDate;
       });
     }
 
@@ -173,34 +179,62 @@ export default function SenderPage() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json<Sender>(worksheet);
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json<Sender>(worksheet);
 
-      // Cập nhật state với dữ liệu mới
-      setSenders(jsonData);
+        // Validate và format dữ liệu trước khi cập nhật
+        const formattedData = jsonData.map(item => ({
+          ...item,
+          joinDate: item.joinDate ? new Date(item.joinDate).toISOString() : new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          // Thêm các trường mặc định nếu cần
+        }));
+
+        setSenders(formattedData);
+        setSearchResults(formattedData);
+        message.success('Cập nhật dữ liệu thành công');
+      } catch (error) {
+        console.error('Lỗi khi đọc file Excel:', error);
+        message.error('Có lỗi xảy ra khi đọc file');
+      }
     };
     reader.readAsArrayBuffer(file);
+    // Reset input file
+    event.target.value = '';
   };
 
   const handleBulkEdit = async (values: any) => {
-    const updatedSenders = senders.map(sender => {
-      if (selectedRows.find(row => row.senderId === sender.senderId)) {
-        return {
-          ...sender,
-          ...values
-        };
-      }
-      return sender;
-    });
+    try {
+      const updatedSenders = senders.map(sender => {
+        if (selectedRows.find(row => row.senderId === sender.senderId)) {
+          return {
+            ...sender,
+            ...values,
+            updatedAt: new Date().toISOString(),
+            // Chỉ cập nhật các trường có giá trị
+            rating: values.rating || sender.rating,
+           
+          };
+        }
+        return sender;
+      });
 
-    setSenders(updatedSenders);
-    setSearchResults(updatedSenders);
-    setSelectedRows([]);
-    setIsBulkEditModalOpen(false);
-    bulkEditForm.resetFields();
+      setSenders(updatedSenders);
+      setSearchResults(updatedSenders);
+      setSelectedRows([]);
+      setIsBulkEditModalOpen(false);
+      bulkEditForm.resetFields();
+
+      // Thông báo thành công
+      message.success(`Đã cập nhật ${selectedRows.length} bản ghi`);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật hàng loạt:', error);
+      message.error('Có lỗi xảy ra khi cập nhật');
+    }
   };
 
   const rowSelection = {
@@ -209,6 +243,7 @@ export default function SenderPage() {
       setSelectedRows(selectedRows);
     },
     getCheckboxProps: (record: Sender) => ({
+      disabled: false, // Có thể thêm điều kiện disable nếu cần
       name: record.senderId,
     }),
   };

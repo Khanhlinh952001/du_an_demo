@@ -1,4 +1,4 @@
-export interface Company {
+export interface CompanyInfo {
     companyId: string;        // Mã công ty
     companyName: string;             // Tên công ty
     bizLicenseNumber: string; // Số giấy phép kinh doanh
@@ -9,8 +9,6 @@ export interface Company {
     password:string;
     website?: string;         // Website công ty (optional)
     logo?: string;            // URL logo công ty
-    
-    // Representative information
     representativeName: string; // Tên người đại diện
     phoneKorea: number[]; // SĐT người đại diện
     phoneVnHan: number[];
@@ -19,14 +17,10 @@ export interface Company {
     warehouseVnHanAddress:string;
     warehouseVnSgnAddress:string;
     bank : BankAccount[];
-    
-    // System information
     bizLicenseFile?: string;   // URL của file giấy phép kinh doanh
     note?: string;             // Ghi chú
     createdAt: Date;           // Ngày tạo
     updatedAt: Date;           // Ngày cập nhật
-    
-    // Additional fields
   
 }
 
@@ -39,3 +33,11 @@ interface BankAccount {
     branch?: string;
     swift?: string;
 } 
+
+
+export interface  CompanySettings{
+    companyId: string;
+    settings: Record<string, any>;
+    createdAt: Date;
+    updatedAt: Date;
+}
