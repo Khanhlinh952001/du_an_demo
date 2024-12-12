@@ -1,8 +1,8 @@
 import { values } from '@ant-design/plots/es/core/utils';
 import { useState, useEffect } from 'react';
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
   onAuthStateChanged,
   signOut,
   createUserWithEmailAndPassword,
@@ -16,10 +16,7 @@ import { CompanyInfo } from '@/types/Company';
 import { message } from 'antd';
 import { formatDate } from '@/utils/format';
 import { generateCompanyId } from '@/utils/idGenerators';
-
-
-// Thêm hàm để lấy thông tin quốc gia
-
+import { useCompany } from './useCompany';
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -28,15 +25,29 @@ export const useAuth = () => {
     error: null
   });
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
+  
+  // Sử dụng useCompany hook
+  const { 
+    getCompany, 
+    createCompany,
+    loading: companyLoading 
+  } = useCompany();
 
   // Utility function to update auth state
-  const updateAuthState = (user: User | null, error: string | null = null) => {
-    setAuthState({ user, loading: false, error });
+  const updateAuthState = (
+    user: User | null, 
+    error: string | null = null
+  ) => {
+    setAuthState({ 
+      user, 
+      loading: false, 
+      error 
+    });
   };
 
   // Create or update user in Firestore
   const handleUserData = async (firebaseUser: any): Promise<User> => {
-                const userRef = doc(firestore, 'users', firebaseUser.uid);
+    const userRef = doc(firestore, 'Users', firebaseUser.uid);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -55,37 +66,41 @@ export const useAuth = () => {
 
     // Existing user - update trial status
     const userData = userDoc.data() as User;
+    
+    // Lấy thông tin công ty nếu có
+    if (userData.companyId) {
+      const companyInfo = await getCompany(userData.companyId);
+      setCompanyInfo(companyInfo);
+      if (!companyInfo) {
+        console.warn(`Company not found for user ${userData.uid}`);
+      }
+    }
+
     return userData;
   };
 
-  const getCompanyInfo = async (companyId: string) => {
-    const companyRef = doc(firestore, 'Companies', companyId);
-    const companyDoc = await getDoc(companyRef);
-    setCompanyInfo(companyDoc.data() as CompanyInfo);
-    return companyDoc.data() as CompanyInfo;
-  };
   // Google Sign In
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope('email');
       provider.addScope('profile');
-      
+
       console.log('Starting Google sign in...');
       const result = await signInWithPopup(auth, provider);
       console.log('Sign in successful:', result);
-      
+
       const userData = await handleUserData(result.user);
       console.log('User data processed:', userData);
-      
+
       updateAuthState(userData);
-      const companyInfo = await getCompanyInfo(userData?.companyId || '');
-      setCompanyInfo(companyInfo);
+      // const companyInfo = await (userData?.companyId || '');
+      // setCompanyInfo(companyInfo);
       message.success('Đăng nhập thành công!');
     } catch (error: any) {
       console.error('Detailed sign in error:', error);
       let errorMessage = 'Đăng nhập thất bại';
-      
+
       switch (error.code) {
         case 'auth/popup-blocked':
           errorMessage = 'Popup bị chặn. Vui lòng cho phép popup và thử lại.';
@@ -105,40 +120,52 @@ export const useAuth = () => {
   };
 
   // Email/Password Registration
-  const registerWithEmail = async (email: string, password: string, displayName: string, values: any) => {
+  const registerWithEmail = async (
+    email: string, 
+    password: string, 
+    companyName: string, 
+    companyCode: string, 
+    bizLicenseNumber: string, 
+    address: string, 
+    phone: string, 
+    representativeName: string
+  ) => {
     try {
+      // 1. Tạo tài khoản Firebase
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      const companyId = generateCompanyId(); // Store the generated ID
-      const Company: CompanyInfo = {
-        companyId,
-        companyName: values.companyName,
-        companyCode: values.companyCode,
-        bizLicenseNumber: values.bizLicenseNumber,
-        companyAddress: values.companyAddress,
-        companyPhone: values.companyPhone,
-        companyEmail: values.companyEmail,
-        createdAt: formatDate(new Date()),
-        password: password,
-        representativeName: values.representativeName,
-        updatedAt: formatDate(new Date()),
-      };
-      await setDoc(doc(firestore, 'Companies', companyId), Company);
+
+      // 2. Tạo công ty mới sử dụng useCompany
+      const newCompany = await createCompany({
+        companyName,
+        companyCode,
+        bizLicenseNumber,
+        companyAddress: address,
+        companyPhone: phone,
+        companyEmail: email,
+        representativeName,
+      });
+
+      if (!newCompany) {
+        throw new Error('Không thể tạo công ty');
+      }
+
+      // 3. Tạo user với companyId
       const userData: User = {
         uid: result.user.uid,
-        email: email,
-        password: password,
-        displayName: displayName,
+        email,
+        password,
+        displayName: representativeName,
         photoURL: '',
-        role:'Manage',
-        companyId,
+        role: 'Manage',
+        companyId: newCompany.companyId,
       };
 
       await setDoc(doc(firestore, 'Users', userData.uid), userData);
-      
       updateAuthState(userData);
+      message.success('Đăng ký thành công!');
     } catch (error: any) {
       console.error('Registration error:', error);
-      const errorMessage = error.code === 'auth/email-already-in-use' 
+      const errorMessage = error.code === 'auth/email-already-in-use'
         ? 'Email đã được sử dụng'
         : 'Đăng ký thất bại';
       updateAuthState(null, errorMessage);
@@ -150,15 +177,20 @@ export const useAuth = () => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const userData = await handleUserData(result.user);
+      
+      if (userData?.companyId) {
+        const companyInfo = await getCompany(userData.companyId);
+        if (!companyInfo) {
+          console.warn('Company information not found');
+        }
+      }
+
       updateAuthState(userData);
-      const companyInfo = await getCompanyInfo(userData?.companyId || '');
-      setCompanyInfo(companyInfo);
       message.success('Đăng nhập thành công!');
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = 'Email hoặc mật khẩu không đúng';
-      updateAuthState(null, errorMessage);
-      message.error(errorMessage);
+      updateAuthState(null, 'Email hoặc mật khẩu không đúng');
+      message.error('Email hoặc mật khẩu không đúng');
     }
   };
 
@@ -195,10 +227,11 @@ export const useAuth = () => {
 
   return {
     ...authState,
+    companyLoading,
+    companyInfo,
     signInWithGoogle,
-    logout,
     registerWithEmail,
     loginWithEmail,
-    companyInfo
+    logout,
   };
 };

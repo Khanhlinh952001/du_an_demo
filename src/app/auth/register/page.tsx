@@ -1,18 +1,32 @@
 'use client'
 import React from 'react';
-import { Form, Input, Button, Row, Col, Typography, notification } from 'antd';
+import { Form, Input, Button, Row, Col, Typography, notification, Alert } from 'antd';
 import Link from 'next/link';
-import { auth,firestore } from '@/libs/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 const { Title } = Typography;
-import { generateManageId } from '@/utils/idGenerators';
-import { ROLES } from '@/constants';
+import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { formatDate } from '@/utils/format';
 function Register() {
     const router = useRouter();
+    const { registerWithEmail, loading } = useAuth();
     const onFinish = async (values: any) => {
+        const formData = {
+            email: values.email,
+            password: values.password,
+            companyName: values.companyName,
+            companyCode: values.companyCode,
+            bizLicenseNumber: values.bizLicenseNumber,
+            address: values.address,
+            phone: values.phone,
+            representativeName: values.representativeName,
+        }
+        console.log(formData);
+        // Alert(values)
+        try {
+            await registerWithEmail(values.email, values.password, values.companyName, values.companyCode, values.bizLicenseNumber, values.address, values.phone, values.representativeName);
+            router.push('/pages/search');
+        } catch (error) {
+            console.error('Registration error:', error);
+        }
        
     };
 
@@ -34,7 +48,7 @@ function Register() {
                     >
                         <Form.Item
                             label="CompanyName"
-                            name="CompanyName"
+                            name="companyName"
                             rules={[{ required: true, message: 'Please input your CompanyName!' }]}
                         >
                             <Input />
@@ -42,14 +56,14 @@ function Register() {
 
                         <Form.Item
                             label="CompanyCode"
-                            name="CompanyCode"
+                            name="companyCode"
                             rules={[{ required: true, message: 'Please input your CompanyCode!' }]}
                         >
                             <Input />
                         </Form.Item>
                         <Form.Item
                             label="Biz license number"
-                            name="BizLicenseNumber"
+                            name="bizLicenseNumber"
                             rules={[{ required: true, message: 'Please input your BizLicenseNumber!' }]}
                         >
                             <Input />
@@ -109,7 +123,7 @@ function Register() {
                         </Form.Item>
                         <Form.Item>
                             <Button type="primary" htmlType="submit" block>
-                                Register
+                                {loading ? 'Registering...' : 'Register'}
                             </Button>
                             <Link className='flex justify-center mt-2 text-blue-500' href="/auth/login">
                                 Already have an account?

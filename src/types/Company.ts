@@ -7,7 +7,6 @@ export interface CompanyInfo {
     companyAddress: string;          // Địa chỉ công ty
     companyPhone: string;            // Số điện thoại công ty
     companyEmail: string;            // Email công ty
-    password:string;
     website?: string;         // Website công ty (optional)
     logo?: string;            // URL logo công ty
     representativeName: string; // Tên người đại diện

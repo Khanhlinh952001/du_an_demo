@@ -45,7 +45,7 @@ const pathToKeyMap: Record<string, string[]> = {
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathName = usePathname();
-  const { user, logout, loading } = useAuthContext();
+  const { user } = useAuthContext();
   if (!user) {
     return <Login  />;
   }
@@ -53,7 +53,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const keys = pathToKeyMap[pathName] || [''];
     return keys;
   }, [pathName]);
-
+  console.log(user)
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider 
