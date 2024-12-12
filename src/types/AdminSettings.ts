@@ -4,7 +4,7 @@ export type EmailContent = {
   };
 
 export type EmailSetting= {
-  adminId: string;
+    adminId: string;
     senderName: string;
     senderEmail: string;
     senderPassword: string;
@@ -19,18 +19,10 @@ export type EmailSetting= {
 
 
 
-export interface PriceSetting{
-  adminId: string;
-  sgnPrice : number;        // Đơn giá từ SGN (Sài Gòn)
-  hanPrice: number;        // Đơn giá từ HAN (Hà Nội)
-  seaPrice: number;        // Đơn giá từ SEA 
-  vnToKrPriceInKRW?: number;      // Đơn giá từ KRW (Hàn Quốc)
-  vnToKrPriceInVND?: number;      // Đơn giá từ VND (Việt Nam)
-  exchangeRate: number;    // Tỷ giá
-  serviceFee?: string;      // Công mua
-}
+
 
 interface ManifestContent{
+  name: string;
   title: string;
   content: string;
 }
@@ -45,7 +37,6 @@ interface NotificationContent{
 }
 
 export interface SampleContent{
-  adminId: string;
   serviceContent: string[];
   manifestContent: ManifestContent;
   invitationContent: InvitationContent;
@@ -53,7 +44,6 @@ export interface SampleContent{
 }
 
 export interface Decentralization{
-  adminId: string;
   role: string;
   permission: string[];
 }
@@ -61,15 +51,14 @@ export interface Decentralization{
 
 
 export interface SystemNotifications{
-  adminId: string;
   content: string;
   position: string;
   date: Date;
 }
 
 export interface AdminSettings {
+  adminId: string;
   emailSetting: EmailSetting;
-  priceSetting: PriceSetting;
   sampleContent: SampleContent;
   decentralization: Decentralization;
   systemNotifications: SystemNotifications;

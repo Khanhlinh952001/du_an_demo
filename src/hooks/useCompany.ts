@@ -59,6 +59,13 @@ export const useCompany = () => {
       const newCompany: CompanyInfo = {
         ...companyData,
         companyId,
+        logo: 'https://bavik.kr/wp-content/uploads/2024/01/9.png',
+        phoneVnHan: [],
+        phoneVnSgn: [],
+        phoneKorea: [],
+        warehouseKrAddress: '',
+        warehouseVnHanAddress: '',
+        warehouseVnSgnAddress: '',
         createdAt: formatDate(new Date()),
         updatedAt: formatDate(new Date()),
       };
@@ -78,25 +85,43 @@ export const useCompany = () => {
   // Cập nhật thông tin công ty
   const updateCompany = async (companyId: string, updateData: Partial<CompanyInfo>) => {
     try {
-      setLoading(true);
-      const companyRef = doc(firestore, 'Companies', companyId);
-      const updatedData = {
-        ...updateData,
-        updatedAt: formatDate(new Date()),
-      };
+        setLoading(true);
+        console.log('Updating company:', companyId); // Log ID công ty
+        console.log('Update data:', updateData); // Log dữ liệu cập nhật
 
-      await updateDoc(companyRef, updatedData);
-      message.success('Cập nhật thông tin công ty thành công');
-      return true;
+        const companyRef = doc(firestore, 'Companies', companyId);
+        
+        // Kiểm tra document tồn tại
+        const docSnap = await getDoc(companyRef);
+        if (!docSnap.exists()) {
+            throw new Error('Không tìm thấy thông tin công ty');
+        }
+
+        // Lọc bỏ các giá trị undefined hoặc null
+        const cleanedData = Object.entries(updateData).reduce((acc, [key, value]) => {
+            if (value !== undefined && value !== null) {
+                acc[key] = value;
+            }
+            return acc;
+        }, {} as Record<string, any>);
+
+        const updatedData = {
+            ...cleanedData,
+            updatedAt: formatDate(new Date()),
+        };
+
+        console.log('Final update data:', updatedData); // Log dữ liệu cuối cùng
+
+        await updateDoc(companyRef, updatedData);
+        return true;
     } catch (error: any) {
-      setError(error.message);
-      message.error('Không thể cập nhật thông tin công ty');
-      return false;
+        console.error('Update error:', error); // Log chi tiết lỗi
+        setError(error.message);
+        return false;
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-
+};
   // Xóa công ty
   const deleteCompany = async (companyId: string) => {
     try {

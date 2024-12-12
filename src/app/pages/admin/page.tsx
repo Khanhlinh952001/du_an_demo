@@ -19,11 +19,11 @@ function AdminPage() {
             label: 'Cấu hình email',
             children: <EmailSetting />,
         },
-        {
-            key: '2',
-            label: 'Thiết lập đơn giá',
-            children: <Price />,
-        },
+        // {
+        //     key: '2',
+        //     label: 'Thiết lập đơn giá',
+        //     children: <Price />,
+        // },
         {
             key: '3',
             label: 'Nội dung mẫu',

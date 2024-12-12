@@ -74,7 +74,7 @@ const UserMenu: React.FC = () => {
                     <Avatar 
                       size="large"
                       icon={<UserOutlined />} 
-                      src={user?.avatar}
+                      src={user?.photoURL || ''}
                       className="border-2 border-gray-200"
                     />
                     <div className="ml-3 hidden md:block">

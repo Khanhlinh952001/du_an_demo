@@ -34,9 +34,8 @@ const pathToKeyMap: Record<string, string[]> = {
   '/pages/orders': ['3'],
   '/pages/manifest': ['4'],
   '/pages/debt': ['5'],
-  '/pages/sender': ['6', '6-1'],
-  '/pages/recipients': ['6', '6-2'],
-  '/pages/settings': ['7'],
+  '/pages/sender': ['6'],
+  '/pages/recipients': ['7'],
 };
 
 // Consolidate header buttons into a configuration array

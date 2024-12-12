@@ -15,9 +15,9 @@ import { AuthState, User } from '@/types/User';
 import { CompanyInfo } from '@/types/Company';
 import { message } from 'antd';
 import { formatDate } from '@/utils/format';
-import { generateCompanyId } from '@/utils/idGenerators';
+import { generateCompanyId, generateEmployeeId } from '@/utils/idGenerators';
 import { useCompany } from './useCompany';
-
+import { ROLES } from '@/constants';
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -51,20 +51,11 @@ export const useAuth = () => {
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      // New user - create with trial period
-      const userData: User = {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email || '',
-        displayName: firebaseUser.displayName || '',
-        photoURL: firebaseUser.photoURL || '',
-        password: '',
-      };
-
-      await setDoc(userRef, userData);
-      return userData;
+      // Nếu user chưa tồn tại trong Firestore, không tự động tạo nữa
+      throw new Error('User not found in database');
     }
 
-    // Existing user - update trial status
+    // Lấy thông tin user từ Firestore
     const userData = userDoc.data() as User;
     
     // Lấy thông tin công ty nếu có
@@ -79,6 +70,39 @@ export const useAuth = () => {
     return userData;
   };
 
+    const uploadUserProfile = async (userData: User | null) => {
+        if (!userData) {
+            console.error('User data is null');
+            return;
+        }
+        try {
+            if (!auth.currentUser) {
+                throw new Error('No authenticated user');
+            }
+            // Cập nhật profile trong Firebase Auth
+            await updateProfile(auth.currentUser, {
+                displayName: userData.displayName,
+                photoURL: userData.photoURL
+            });
+
+            // Cập nhật thông tin trong Firestore
+            const userRef = doc(firestore, 'Users', userData.uid);
+            await updateDoc(userRef, {
+                ...userData,
+                updatedAt: formatDate(new Date())
+            });
+
+            // Reload user data và cập nhật state
+            const updatedUserDoc = await getDoc(userRef);
+            const updatedUserData = updatedUserDoc.data() as User;
+            updateAuthState(updatedUserData);
+
+            message.success('Cập nhật thông tin thành công!');
+        } catch (error) {
+            console.error('Cập nhật thông tin thất bại:', error);
+            message.error('Cập nhật thông tin thất bại. Vui lòng thử lại sau!');
+        }
+    }
   // Google Sign In
   const signInWithGoogle = async () => {
     try {
@@ -154,10 +178,14 @@ export const useAuth = () => {
         uid: result.user.uid,
         email,
         password,
+        employeeId: generateEmployeeId(),
         displayName: representativeName,
-        photoURL: '',
-        role: 'Manage',
+        phone: phone,
+        photoURL: `https://ui-avatars.com/api/?name=${representativeName}`,
+        role: ROLES.MANAGER,
         companyId: newCompany.companyId,
+        createdAt: formatDate(new Date()),
+        updatedAt: formatDate(new Date()),
       };
 
       await setDoc(doc(firestore, 'Users', userData.uid), userData);
@@ -233,5 +261,6 @@ export const useAuth = () => {
     registerWithEmail,
     loginWithEmail,
     logout,
+    uploadUserProfile
   };
 };

@@ -1,4 +1,4 @@
-import { Card, Col, Row, Modal, Button, Input, Form, Table, Select, Checkbox, List } from "antd";
+import { Card, Col, Row, Modal, Button, Input, Form, Table, Select, Checkbox, List, message } from "antd";
 import { useState } from "react";
 import { ROLES, RoleType } from "@/constants";
 // Define RoleType as an enum
@@ -77,6 +77,12 @@ function Decentralization() {
     const rolePermissions: Record<RoleType, PermissionType[]> = {
         [ROLES.ADMIN]: [
             
+            'viewAdminPage', 'managePickup', 'manageAirOrders', 
+            'manageSeaOrders', 'manageThecbe', 'lookup', 
+            'createOrders', 'createManifest', 'debt',
+            'viewSender', 'viewReceiver'
+        ],
+        [ROLES.EMPLOYEE]: [
             'viewAdminPage', 'managePickup', 'manageAirOrders', 
             'manageSeaOrders', 'manageThecbe', 'lookup', 
             'createOrders', 'createManifest', 'debt',
@@ -197,6 +203,7 @@ function Decentralization() {
 
 function handleEdit(id: string) {
     // Logic to edit the role with the given id
+    message.info(`Chuc nang dang phát triển`);
     console.log(`Edit role with id: ${id}`);
 }
 

@@ -5,6 +5,9 @@ const nextConfig = {
         // your project has ESLint errors.
         ignoreDuringBuilds: true,
       },
+    images: {
+        domains: ['bavik.kr','img.freepik.com','ui-avatars.com'], // Thêm domain của nguồn ảnh tại đây
+    },
 
 };
 

@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Row, Col, Typography, notification, Alert } from 'antd';
 import Link from 'next/link';
 const { Title } = Typography;
@@ -8,26 +8,31 @@ import { useRouter } from 'next/navigation';
 function Register() {
     const router = useRouter();
     const { registerWithEmail, loading } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const onFinish = async (values: any) => {
-        const formData = {
-            email: values.email,
-            password: values.password,
-            companyName: values.companyName,
-            companyCode: values.companyCode,
-            bizLicenseNumber: values.bizLicenseNumber,
-            address: values.address,
-            phone: values.phone,
-            representativeName: values.representativeName,
-        }
-        console.log(formData);
-        // Alert(values)
+        setIsSubmitting(true);
         try {
-            await registerWithEmail(values.email, values.password, values.companyName, values.companyCode, values.bizLicenseNumber, values.address, values.phone, values.representativeName);
-            router.push('/pages/search');
+            await registerWithEmail(
+                values.email, 
+                values.password, 
+                values.companyName, 
+                values.companyCode, 
+                values.bizLicenseNumber, 
+                values.address, 
+                values.phone, 
+                values.representativeName
+            );
+            router.push('/pages/profile');
         } catch (error) {
             console.error('Registration error:', error);
+            notification.error({
+                message: 'Registration Failed',
+                description: 'There was an error during registration. Please try again.',
+            });
+        } finally {
+            setIsSubmitting(false);
         }
-       
     };
 
     const onFinishFailed = (errorInfo: any) => {
@@ -122,8 +127,14 @@ function Register() {
                             <Input.Password />
                         </Form.Item>
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" block>
-                                {loading ? 'Registering...' : 'Register'}
+                            <Button 
+                                type="primary" 
+                                htmlType="submit" 
+                                block 
+                                loading={isSubmitting}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Registering...' : 'Register'}
                             </Button>
                             <Link className='flex justify-center mt-2 text-blue-500' href="/auth/login">
                                 Already have an account?

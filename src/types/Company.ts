@@ -1,4 +1,3 @@
-import { RoleType } from "@/constants";
 export interface CompanyInfo {
     companyId: string;        // Mã công ty
     companyName: string;             // Tên công ty
@@ -18,10 +17,16 @@ export interface CompanyInfo {
     warehouseVnSgnAddress?:string;
     bank?: BankAccount[];
     bizLicenseFile?: string;   // URL của file giấy phép kinh doanh
+    sgnPrice?: number;        // Đơn giá từ SGN (Sài Gòn)
+    hanPrice?: number;        // Đơn giá từ HAN (Hà Nội)
+    seaPrice?: number;        // Đơn giá từ SEA 
+    vnToKrPriceInKRW?: number;      // Đơn giá từ KRW (Hàn Quốc)
+    vnToKrPriceInVND?: number;      // Đơn giá từ VND (Việt Nam)
+    exchangeRate?: number;    // Tỷ giá
+    serviceFee?: string;      // Công mua
     note?: string;             // Ghi chú
     createdAt: Date |string;           // Ngày tạo
     updatedAt: Date |string;           // Ngày cập nhật
- 
 }
 
 

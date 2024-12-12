@@ -10,7 +10,7 @@ function Login() {
     const { loginWithEmail ,loading } = useAuth();
     const onFinish = async (values: any) => {
       await loginWithEmail(values.username, values.password);
-      router.push('/pages/search');
+      router.push('/pages/profile');
     };
 
     const onFinishFailed = (errorInfo: any) => {
