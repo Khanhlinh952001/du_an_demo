@@ -17,6 +17,7 @@ const UserMenu: React.FC = () => {
         {
             key: 'profile',
             icon: <UserOutlined />,
+            
             label: (
               <Link href="/pages/profile">
                 <div className="flex items-center py-2 px-1 hover:text-blue-500">

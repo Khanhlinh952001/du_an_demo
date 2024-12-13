@@ -50,16 +50,25 @@ export interface Decentralization{
 
 
 
-export interface SystemNotifications{
+export interface SystemNotifications {
+  id: string;
+  companyId: string;
+  title: string;
   content: string;
-  position: string;
-  date: Date;
+  type: 'update' | 'warning' | 'info';
+  createdAt: string;
+  createdBy: string;
+  isRead: boolean;
+  targetRoles: string[]; // Thêm trường này để xác định role nào sẽ nhận thông báo
+  readBy: string[];
+  module: string; // Thêm trường này để phân loại thông báo theo module
+  action: string; // Thêm trường này để xác định hành động
 }
 
 export interface AdminSettings {
   adminId: string;
   emailSetting: EmailSetting;
   sampleContent: SampleContent;
-  decentralization: Decentralization;
+  decentralization: Decentralization[];
   systemNotifications: SystemNotifications;
 }

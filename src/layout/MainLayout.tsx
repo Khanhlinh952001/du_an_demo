@@ -18,7 +18,6 @@ import {
   UsergroupAddOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 const { Header, Content, Sider } = Layout;
 import { usePathname} from 'next/navigation';
 import { useAuthContext } from '@/provider/AuthProvider';
@@ -26,6 +25,8 @@ import Login from '@/app/auth/login/page';
 import UserMenu from './UserMenu';
 import { headerButtons } from './headerButton';
 import { menuItems } from './menuItems';
+import { useDecentralization } from '@/hooks/useDecentralization';
+import { PermissionType } from '@/constants/decentalization';
 
 
 const pathToKeyMap: Record<string, string[]> = {
@@ -45,14 +46,54 @@ const pathToKeyMap: Record<string, string[]> = {
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathName = usePathname();
   const { user } = useAuthContext();
+  const { decentralization } = useDecentralization(user?.companyId || '');
+
+  const hasPermission = (requiredPermission: PermissionType) => {
+    const userRole = user?.role;
+    if (!userRole || !decentralization) return false;
+    
+    const rolePermissions = decentralization.find(d => d.role === userRole);
+    return rolePermissions?.permission.includes(requiredPermission) ?? false;
+  };
+
+  const filteredMenuItems = React.useMemo(() => {
+    const permissionMap: Record<string, PermissionType> = {
+      '1': 'lookup',
+      '2': 'receiveStatistics',
+      '3': 'createOrders',
+      '4': 'createManifest',
+      '5': 'debt',
+      '6': 'viewSender',
+      '7': 'viewReceiver'
+    };
+
+    return (menuItems || []).filter(item => {
+      if (!item?.key) return false;
+      const permission = permissionMap[item.key as string];
+      return permission ? hasPermission(permission) : false;
+    });
+  }, [decentralization]);
+
+  const filteredHeaderButtons = React.useMemo(() => {
+    const permissionMap: Record<string, PermissionType> = {
+      'pickup': 'managePickup',
+      'air': 'manageAirOrders',
+      'sea': 'manageSeaOrders',
+      'taekbae': 'manageThecbe'
+    };
+
+    return headerButtons.filter(button => {
+      const permission = permissionMap[button.key];
+      return permission ? hasPermission(permission) : false;
+    });
+  }, [decentralization]);
+
+  const selectedKeys = pathToKeyMap[pathName] || [];
+
   if (!user) {
-    return <Login  />;
+    return <Login />;
   }
-  const selectedKeys = React.useMemo(() => {
-    const keys = pathToKeyMap[pathName] || [''];
-    return keys;
-  }, [pathName]);
-  console.log(user)
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider 
@@ -85,14 +126,14 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           mode="inline"
           selectedKeys={selectedKeys}
           defaultOpenKeys={selectedKeys}
-          items={menuItems}
+          items={filteredMenuItems}
           style={{ border: 'none', padding: '0 12px' }}
         />
       </Sider>
       <Layout style={{ marginLeft: 240 }}>
         <Header className="bg-white p-0 h-[64px] shadow-sm sticky top-0 z-[1000] flex justify-between">
           <div className="flex items-center space-x-2 h-full px-6">
-            {headerButtons.map(button => (
+            {filteredHeaderButtons.map(button => (
               <Button
                 key={button.key}
                 type="text"

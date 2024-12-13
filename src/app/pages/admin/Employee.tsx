@@ -69,8 +69,8 @@ function Employee() {
         }
     };
 
-    const handleEdit = (employeeId: string) => {
-        const employee = employees.find(emp => emp.uid === employeeId);
+    const handleEdit = (uid: string) => {
+        const employee = employees.find(emp => emp.uid === uid);
         if (employee) {
             showModal(employee);
         }

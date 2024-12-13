@@ -1,5 +1,5 @@
 // src/services/userService.ts
-import { auth, firestore } from '@/libs/firebase';
+import { auth, firestore, secondaryApp } from '@/libs/firebase';
 import { User } from '@/types/User';
 import { 
   collection, 
@@ -10,18 +10,29 @@ import {
   getDocs, 
   query, 
   where, 
-  setDoc 
+  setDoc, 
+  getDoc
 } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { RoleType } from '@/constants/roles';
+import { createUserWithEmailAndPassword, deleteUser, getAuth } from 'firebase/auth';
+import { ROLES, RoleType } from '@/constants/roles';
 import { formatDate } from '@/utils/format';
 import { generateEmployeeId } from '@/utils/idGenerators';
 import { useState, useEffect } from 'react';
+import { Decentralization } from '@/types/AdminSettings';
+import { 
+  ADMIN_PERMISSION, 
+  MANAGER_PERMISSION,
+  EMPLOYEE_PERMISSION,
+  WAREHOUSE_VN_PERMISSION,
+  WAREHOUSE_KR_PERMISSION,
+  ACCOUNTANT_PERMISSION 
+} from '@/constants/decentalization';
 
 export const useEmployee = (companyId: string) => {
   const USERS_COLLECTION = 'Users';
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<User[]>([]);
+  const secondaryAuth = getAuth(secondaryApp);
   const createEmployee = async (
     email: string, 
     password: string,
@@ -34,7 +45,7 @@ export const useEmployee = (companyId: string) => {
       setLoading(true);
       const employeeId = generateEmployeeId();
       
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
       const uid = userCredential.user.uid;
       
       const userData: User = {
@@ -54,8 +65,57 @@ export const useEmployee = (companyId: string) => {
       };
 
       await setDoc(doc(firestore, USERS_COLLECTION, uid), userData);
-      await getAllEmployees();
 
+      // Updated permissions handling
+      let permissions: Decentralization[] = [];
+      switch (role) {
+        case ROLES.ADMIN:
+          permissions = ADMIN_PERMISSION;
+          break;
+        case ROLES.MANAGER:
+          permissions = MANAGER_PERMISSION;
+          break;
+        case ROLES.WAREHOUSE_VN:
+          permissions = WAREHOUSE_VN_PERMISSION;
+          break;
+        case ROLES.WAREHOUSE_KR:
+          permissions = WAREHOUSE_KR_PERMISSION;
+          break;
+        case ROLES.ACCOUNTANT:
+          permissions = ACCOUNTANT_PERMISSION;
+          break;
+        default:
+          permissions = EMPLOYEE_PERMISSION;
+      }
+
+      // Updated adminSettings handling with better error handling
+      try {
+        const adminSettingsRef = doc(firestore, 'adminSettings', companyId);
+        const adminSettingsDoc = await getDoc(adminSettingsRef);
+
+        if (adminSettingsDoc.exists()) {
+          const currentDecentralization = adminSettingsDoc.data()?.decentralization || [];
+          // Filter out any duplicate permissions before updating
+          const uniquePermissions = Array.from(new Set([...currentDecentralization, ...permissions]));
+          await updateDoc(adminSettingsRef, {
+            decentralization: uniquePermissions
+          });
+        } else {
+          await setDoc(adminSettingsRef, {
+            adminId: companyId,
+            decentralization: permissions,
+            emailSetting: {},
+            sampleContent: {},
+            systemNotifications: {}
+          });
+        }
+      } catch (decentralizationError) {
+        console.error('Decentralization update error:', decentralizationError);
+        // Continue with user creation even if permission update fails
+        // You might want to add some notification here
+      }
+
+      await getAllEmployees();
     } catch (error) {
       console.error('Create employee error:', error);
       throw new Error('Failed to create employee');
@@ -63,6 +123,8 @@ export const useEmployee = (companyId: string) => {
       setLoading(false);
     }
   };
+
+
 
   const updateEmployee = async (uid: string, userData: Partial<User>) => {
     try {
@@ -85,6 +147,14 @@ export const useEmployee = (companyId: string) => {
   const deleteEmployee = async (uid: string) => {
     try {
       setLoading(true);
+      
+      // Xóa user từ Authentication
+      const user = auth.currentUser;
+      if (user && user.uid === uid) {
+        await deleteUser(user);
+      }
+      
+      // Xóa user từ Firestore
       await deleteDoc(doc(firestore, USERS_COLLECTION, uid));
       await getAllEmployees();
     } catch (error) {
@@ -132,3 +202,5 @@ export const useEmployee = (companyId: string) => {
     employees
   };
 };
+
+

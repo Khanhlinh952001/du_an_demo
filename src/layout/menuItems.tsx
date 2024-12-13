@@ -1,6 +1,7 @@
 import { MenuProps } from 'antd';
 import Link from 'next/link';
 import { SearchOutlined, BarChartOutlined, FileAddOutlined, ProfileOutlined, DollarOutlined, UserOutlined, UsergroupAddOutlined, SettingOutlined } from '@ant-design/icons';
+import { PermissionType } from '@/constants/decentalization';
 
 export const menuItems: MenuProps['items'] = [
     { key: '1', label: <Link href="/pages/search" style={{ color: 'inherit' }}>Tra cứu</Link>, icon: <SearchOutlined /> },

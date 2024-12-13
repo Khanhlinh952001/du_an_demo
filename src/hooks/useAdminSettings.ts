@@ -37,7 +37,7 @@ export const useAdminSettings = (adminId: string) => {
           adminId,
           emailSetting: {} as EmailSetting,
           sampleContent: {} as SampleContent,
-          decentralization: {} as Decentralization,
+          decentralization: [] as Decentralization[],
           systemNotifications: {} as SystemNotifications,
         };
         await setDoc(settingsRef, initialSettings);

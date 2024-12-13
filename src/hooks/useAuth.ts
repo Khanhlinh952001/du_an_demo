@@ -17,6 +17,8 @@ import { message } from 'antd';
 import { formatDate } from '@/utils/format';
 import { generateCompanyId, generateEmployeeId } from '@/utils/idGenerators';
 import { useCompany } from './useCompany';
+import { useDecentralization } from './useDecentralization';
+import { MANAGER_PERMISSION ,WAREHOUSE_KR_PERMISSION ,WAREHOUSE_VN_PERMISSION ,ACCOUNTANT_PERMISSION ,EMPLOYEE_PERMISSION ,ADMIN_PERMISSION } from '@/constants/decentalization';
 import { ROLES } from '@/constants';
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -188,8 +190,56 @@ export const useAuth = () => {
         updatedAt: formatDate(new Date()),
       };
 
-      await setDoc(doc(firestore, 'Users', userData.uid), userData);
+      await setDoc(doc(firestore, 'Users', userData.uid), userData); 
       updateAuthState(userData);
+
+      // Thêm tất cả các quyền mặc định
+      const allDefaultPermissions = [
+        ...MANAGER_PERMISSION,
+        ...WAREHOUSE_VN_PERMISSION,
+        ...WAREHOUSE_KR_PERMISSION,
+        ...ACCOUNTANT_PERMISSION
+      ];
+
+      const adminSettingsRef = doc(firestore, "adminSettings", newCompany.companyId);
+      await setDoc(adminSettingsRef, {
+        adminId: newCompany.companyId,
+        decentralization: allDefaultPermissions,
+        emailSetting: {
+          senderName: '',
+          senderEmail: '',
+          senderPassword: '',
+          toManifestName: '',
+          toManifestEmail: '',
+          status: 'pending',
+          content: {},
+          schedule: [],
+          timeCallApi: [],
+          toDeliveryEmail: ''
+        },
+        sampleContent: {
+          serviceContent: [],
+          manifestContent: {
+            name: '',
+            title: '',
+            content: ''
+          },
+          invitationContent: {
+            title: '',
+            content: ''
+          },
+          notificationContent: {
+            title: '',
+            content: ''
+          }
+        },
+        systemNotifications: {
+          content: '',
+          position: '',
+          date: new Date()
+        }
+      });
+      
       message.success('Đăng ký thành công!');
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -246,7 +296,7 @@ export const useAuth = () => {
         }
       } catch (error) {
         console.error('Auth state error:', error);
-        updateAuthState(null, 'Kiểm tra trạng thái đăng nhập thất bại');
+        updateAuthState(null, 'Kiểm tra tr���ng thái đăng nhập thất bại');
       }
     });
 
